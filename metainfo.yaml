@@ -1,0 +1,13 @@
+maintainer: ivan
+description: Making QFuture useful
+tier: 1
+type: functional
+platforms:
+    - name: All
+portingAid: false
+deprecated: false
+release: false
+libraries:
+ - qmake: AsynQt
+   cmake: "KF5::AsynQt"
+cmakename: KF5AsynQt
