@@ -116,7 +116,7 @@ namespace Process {
         // TODO: Where to delete this process?
         auto process = new QProcess();
 
-        process->setProcessChannelMode(QProcess::ForwardedChannels);
+        // process->setProcessChannelMode(QProcess::ForwardedChannels);
         process->setProgram(command);
         process->setArguments(arguments);
 

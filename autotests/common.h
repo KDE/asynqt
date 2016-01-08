@@ -23,6 +23,15 @@
 #include <QElapsedTimer>
 #include <QCoreApplication>
 
+#define RUN_TEST(Type)                                                         \
+    if (QCoreApplication::arguments().isEmpty()                                \
+            || QCoreApplication::arguments().contains(#Type)) {                \
+        Type test;                                                             \
+        QTest::qExec(&test);                                                   \
+    } else {                                                                   \
+        qDebug() << "Test" << #Type << "is \033[1;33mdisabled\033[0m";         \
+    }
+
 // We can not use user-defined literals yet, but we want to make this
 // prettier
 

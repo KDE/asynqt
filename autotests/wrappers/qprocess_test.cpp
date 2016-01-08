@@ -17,7 +17,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "process.h"
+#include "qprocess_test.h"
 
 #include <wrappers/process.h>
 
@@ -27,7 +27,7 @@
 
 #include "common.h"
 
-namespace Process {
+namespace wrappers {
 
 ProcessExecutionTest::ProcessExecutionTest()
 {
@@ -68,11 +68,12 @@ void ProcessExecutionTest::testProcessOutput()
     auto future = AsynQt::Process::exec<QString>(
         "echo", { "Hello KDE" },
         [] (QProcess *process) {
-            qDebug() << process->readAllStandardOutput();
-            return QString();
+            return QString::fromLatin1(process->readAllStandardOutput());
         });
 
     QVERIFY(waitForFuture(future, 1 _seconds));
+
+    QCOMPARE(future.result(), QString("Hello KDE\n"));
 
 }
 
@@ -86,4 +87,4 @@ void ProcessExecutionTest::cleanupTestCase()
     delete m_process;
 }
 
-} // namespace Process
+} // namespace wrappers

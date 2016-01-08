@@ -21,25 +21,20 @@
 #include <QCoreApplication>
 #include <QList>
 
-#include "process.h"
-#include "dbus.h"
-
-#define TOKEN_CONCAT_IMPL(x, y) x ## y
-#define TOKEN_CONCAT(x, y) TOKEN_CONCAT_IMPL(x, y)
-
-#define RUN_TEST(Type)                                                         \
-    Type TOKEN_CONCAT(test, __LINE__);                                         \
-    QTest::qExec(&TOKEN_CONCAT(test, __LINE__));
+#include "common.h"
+#include "wrappers/qprocess_test.h"
+#include "wrappers/qdbus_test.h"
+#include "base/transform_test.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
 
-    RUN_TEST(Process::ProcessExecutionTest);
-    RUN_TEST(DBus::DBusExecutionTest);
+    RUN_TEST(wrappers::ProcessExecutionTest);
+    RUN_TEST(wrappers::DBusExecutionTest);
 
-    // return app.exec();
-    // QTest::qExec(&tc, argc, argv);
+    RUN_TEST(base::TransformTest);
+
     return 1;
 }
 

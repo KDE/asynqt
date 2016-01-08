@@ -17,7 +17,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "dbus.h"
+#include "qdbus_test.h"
 
 #include <wrappers/dbus.h>
 
@@ -30,7 +30,7 @@
 
 #include "common.h"
 
-namespace DBus {
+namespace wrappers {
 
 DBusExecutionTest::DBusExecutionTest()
 {
@@ -74,4 +74,5 @@ void DBusExecutionTest::cleanupTestCase()
     delete m_dbus;
 }
 
-} // namespace DBus
+} // namespace wrappers
+

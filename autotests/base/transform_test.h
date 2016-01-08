@@ -17,35 +17,33 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef TEST_PROCESS_H
-#define TEST_PROCESS_H
+#ifndef TEST_TRANSFORM_H
+#define TEST_TRANSFORM_H
 
 #include <QObject>
 
 class QProcess;
 
-namespace Process {
+namespace base {
 
-    class ProcessExecutionTest : public QObject {
-        Q_OBJECT
+class TransformTest : public QObject {
+    Q_OBJECT
 
-    public:
-        ProcessExecutionTest();
+public:
+    TransformTest();
 
-    private Q_SLOTS:
-        void initTestCase();
-        void testProcessExecution();
-        void testProcessExecutionWithMap();
-        void testProcessOutput();
-        void cleanupTestCase();
+private Q_SLOTS:
+    void initTestCase();
+    void testTransform();
+    void cleanupTestCase();
 
-    private:
-        QProcess *m_process;
+private:
+    QProcess *m_process1;
+    QProcess *m_process2;
 
-    };
+};
 
-} // namespace Process
+} // namespace base
 
-
-#endif // TEST_PROCESS_H
+#endif // TEST_TRANSFORM_H
 

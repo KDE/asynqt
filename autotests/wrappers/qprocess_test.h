@@ -17,33 +17,34 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef TEST_DBUS_H
-#define TEST_DBUS_H
+#ifndef TEST_PROCESS_H
+#define TEST_PROCESS_H
 
 #include <QObject>
-#include <QDBusInterface>
 
-namespace DBus {
+class QProcess;
 
-    class DBusExecutionTest : public QObject {
-        Q_OBJECT
+namespace wrappers {
 
-    public:
-        DBusExecutionTest();
+class ProcessExecutionTest : public QObject {
+    Q_OBJECT
 
-    private Q_SLOTS:
-        void initTestCase();
-        void testDBusExecution();
-        void testDBusExecutionWithArgument();
-        void cleanupTestCase();
+public:
+    ProcessExecutionTest();
 
-    private:
-        QDBusInterface *m_dbus;
+private Q_SLOTS:
+    void initTestCase();
+    void testProcessExecution();
+    void testProcessExecutionWithMap();
+    void testProcessOutput();
+    void cleanupTestCase();
 
-    };
+private:
+    QProcess *m_process;
 
-} // namespace DBus
+};
 
+} // namespace wrappers
 
-#endif // TEST_DBUS_H
+#endif // TEST_PROCESS_H
 
