@@ -17,45 +17,28 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "transform_test.h"
-
-#include <wrappers/process.h>
-#include <base/transform.h>
+#ifndef ASYNQT_BASE_CONTINUEWITH_H
+#define ASYNQT_BASE_CONTINUEWITH_H
 
 #include <QFuture>
-#include <QCoreApplication>
-#include <QtTest>
+#include <QFutureWatcher>
 
-#include "common.h"
+#include <type_traits>
+#include <memory>
 
-namespace base {
+#include "flatten.h"
+#include "transform.h"
 
-TransformTest::TransformTest()
+namespace AsynQt {
+
+template <typename _In, typename _Continuation>
+auto continueWith(const QFuture<_In> &future, _Continuation &&continuation)
+    -> decltype(flatten(transform(future, std::forward<_Continuation>(continuation))))
 {
+    return flatten(transform(future, std::forward<_Continuation>(continuation)));
 }
 
-void TransformTest::testTransform()
-{
-    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
+} // namespace AsynQt
 
-    auto transformedFuture = AsynQt::transform(future,
-        [] (const QString &input) {
-            qDebug() << "Result: " << input;
-            return input.length();
-        });
-
-    QVERIFY(waitForFuture(transformedFuture, 1 _seconds));
-
-    QCOMPARE(transformedFuture.result(), 10);
-}
-
-void TransformTest::initTestCase()
-{
-}
-
-void TransformTest::cleanupTestCase()
-{
-}
-
-} // namespace base
+#endif // ASYNQT_BASE_CONTINUEWITH_H
 

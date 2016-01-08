@@ -48,7 +48,7 @@ void ProcessExecutionTest::testProcessExecutionWithMap()
 {
     bool mapFunctionCalled = false;
 
-    auto future = AsynQt::Process::exec<int>(
+    auto future = AsynQt::Process::exec(
         "sleep", { "2" },
         [&mapFunctionCalled] (QProcess *process) {
             mapFunctionCalled = true;
@@ -65,11 +65,7 @@ void ProcessExecutionTest::testProcessExecutionWithMap()
 
 void ProcessExecutionTest::testProcessOutput()
 {
-    auto future = AsynQt::Process::exec<QString>(
-        "echo", { "Hello KDE" },
-        [] (QProcess *process) {
-            return QString::fromLatin1(process->readAllStandardOutput());
-        });
+    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
 
     QVERIFY(waitForFuture(future, 1 _seconds));
 

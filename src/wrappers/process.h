@@ -109,9 +109,10 @@ QFuture<_Result> makeFuture(QProcess *process, _Function map)
 
 namespace Process {
 
-    template <typename _Result, typename _Function>
-    QFuture<_Result> exec(const QString &command, const QStringList &arguments,
+    template <typename _Function>
+    auto exec(const QString &command, const QStringList &arguments,
                           _Function &&map)
+        -> QFuture<decltype(map(Q_NULLPTR))>
     {
         // TODO: Where to delete this process?
         auto process = new QProcess();
@@ -120,13 +121,17 @@ namespace Process {
         process->setProgram(command);
         process->setArguments(arguments);
 
-        return AsynQt::makeFuture<_Result>(process,
-                                           std::forward<_Function>(map));
+        return AsynQt::makeFuture<decltype(map(Q_NULLPTR))>(
+            process, std::forward<_Function>(map));
     }
 
     ASYNQT_EXPORT
     QFuture<QProcess *> exec(const QString &command,
                              const QStringList &arguments);
+
+    ASYNQT_EXPORT
+    QFuture<QString> getOutput(const QString &command,
+                               const QStringList &arguments);
 
 } // namespace Process
 

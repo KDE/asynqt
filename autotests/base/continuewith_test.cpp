@@ -17,10 +17,10 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "transform_test.h"
+#include "continuewith_test.h"
 
 #include <wrappers/process.h>
-#include <base/transform.h>
+#include <base/continuewith.h>
 
 #include <QFuture>
 #include <QCoreApplication>
@@ -30,30 +30,33 @@
 
 namespace base {
 
-TransformTest::TransformTest()
+ContinueWithTest::ContinueWithTest()
 {
 }
 
-void TransformTest::testTransform()
-{
-    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
-
-    auto transformedFuture = AsynQt::transform(future,
-        [] (const QString &input) {
-            qDebug() << "Result: " << input;
-            return input.length();
-        });
-
-    QVERIFY(waitForFuture(transformedFuture, 1 _seconds));
-
-    QCOMPARE(transformedFuture.result(), 10);
+namespace {
+    QFuture<QString> execEcho(const QString &message)
+    {
+        return AsynQt::Process::getOutput("echo", { message.trimmed() });
+    }
 }
 
-void TransformTest::initTestCase()
+void ContinueWithTest::testContinueWith()
+{
+    QFuture<QString> future = AsynQt::Process::getOutput("echo", { "Hello KDE!" });
+
+    QFuture<QString> connectedFuture = AsynQt::continueWith(future, execEcho);
+
+    QVERIFY(waitForFuture(connectedFuture, 1 _seconds));
+
+    QCOMPARE(connectedFuture.result(), QString("Hello KDE!\n"));
+}
+
+void ContinueWithTest::initTestCase()
 {
 }
 
-void TransformTest::cleanupTestCase()
+void ContinueWithTest::cleanupTestCase()
 {
 }
 

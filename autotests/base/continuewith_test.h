@@ -17,45 +17,33 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "transform_test.h"
+#ifndef TEST_CONTINUEWITH_H
+#define TEST_CONTINUEWITH_H
 
-#include <wrappers/process.h>
-#include <base/transform.h>
+#include <QObject>
 
-#include <QFuture>
-#include <QCoreApplication>
-#include <QtTest>
-
-#include "common.h"
+class QProcess;
 
 namespace base {
 
-TransformTest::TransformTest()
-{
-}
+class ContinueWithTest : public QObject {
+    Q_OBJECT
 
-void TransformTest::testTransform()
-{
-    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
+public:
+    ContinueWithTest();
 
-    auto transformedFuture = AsynQt::transform(future,
-        [] (const QString &input) {
-            qDebug() << "Result: " << input;
-            return input.length();
-        });
+private Q_SLOTS:
+    void initTestCase();
+    void testContinueWith();
+    void cleanupTestCase();
 
-    QVERIFY(waitForFuture(transformedFuture, 1 _seconds));
+private:
+    QProcess *m_process1;
+    QProcess *m_process2;
 
-    QCOMPARE(transformedFuture.result(), 10);
-}
-
-void TransformTest::initTestCase()
-{
-}
-
-void TransformTest::cleanupTestCase()
-{
-}
+};
 
 } // namespace base
+
+#endif // TEST_CONTINUEWITH_H
 

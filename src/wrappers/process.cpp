@@ -24,8 +24,15 @@ namespace Process {
 
 QFuture<QProcess*> exec(const QString &command, const QStringList &arguments)
 {
-    return exec<QProcess *>(command, arguments,
+    return exec(command, arguments,
                             [](QProcess *process) { return process; });
+}
+
+QFuture<QString> getOutput(const QString &command, const QStringList &arguments)
+{
+    return exec(command, arguments, [](QProcess *process) {
+        return QString::fromLatin1(process->readAllStandardOutput());
+    });
 }
 
 } // namespace Process

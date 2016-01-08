@@ -28,6 +28,7 @@
 
 #include "base/transform_test.h"
 #include "base/flatten_test.h"
+#include "base/continuewith_test.h"
 
 int main(int argc, char *argv[])
 {
@@ -38,6 +39,7 @@ int main(int argc, char *argv[])
 
     RUN_TEST(base::TransformTest);
     RUN_TEST(base::FlattenTest);
+    RUN_TEST(base::ContinueWithTest);
 
     return 1;
 }

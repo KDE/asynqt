@@ -36,16 +36,12 @@ FlattenTest::FlattenTest()
 
 QFuture<QString> execEcho(const QString &message)
 {
-    return AsynQt::Process::exec<QString>(
-        "echo", { message.trimmed() },
-        [](QProcess *process) {
-            return QString::fromLatin1(process->readAllStandardOutput());
-        });
+    return AsynQt::Process::getOutput("echo", { message.trimmed() });
 }
 
 void FlattenTest::testFlatten()
 {
-    auto future = AsynQt::Process::exec<QFuture<QString>>(
+    auto future = AsynQt::Process::exec(
         "echo", { "Hello KDE!" },
         [] (QProcess *process) {
             return execEcho(QString::fromLatin1(process->readAllStandardOutput()));
@@ -57,38 +53,6 @@ void FlattenTest::testFlatten()
 
     QCOMPARE(flattenFuture.result(), QString("Hello KDE!\n"));
 }
-
-// void FlattenTest::testProcessExecutionWithMap()
-// {
-//     bool mapFunctionCalled = false;
-//
-//     auto future = AsynQt::Process::exec<int>(
-//         "sleep", { "2" },
-//         [&mapFunctionCalled] (QProcess *process) {
-//             mapFunctionCalled = true;
-//
-//             return process->exitCode();
-//         });
-//
-//     QVERIFY(waitForFuture(future, 3 _seconds));
-//
-//     QVERIFY(mapFunctionCalled);
-//
-//     QCOMPARE(future.result(), 0);
-// }
-//
-// void FlattenTest::testProcessOutput()
-// {
-//     auto future = AsynQt::Process::exec<QString>(
-//         "echo", { "Hello KDE" },
-//         [] (QProcess *process) {
-//             qDebug() << process->readAllStandardOutput();
-//             return QString();
-//         });
-//
-//     QVERIFY(waitForFuture(future, 1 _seconds));
-//
-// }
 
 void FlattenTest::initTestCase()
 {
