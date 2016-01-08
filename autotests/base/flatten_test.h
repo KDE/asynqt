@@ -17,28 +17,33 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <QtTest/QtTest>
-#include <QCoreApplication>
-#include <QList>
+#ifndef TEST_FLATTEN_H
+#define TEST_FLATTEN_H
 
-#include "common.h"
+#include <QObject>
 
-#include "wrappers/qprocess_test.h"
-#include "wrappers/qdbus_test.h"
+class QProcess;
 
-#include "base/transform_test.h"
-#include "base/flatten_test.h"
+namespace base {
 
-int main(int argc, char *argv[])
-{
-    QCoreApplication app(argc, argv);
+class FlattenTest : public QObject {
+    Q_OBJECT
 
-    RUN_TEST(wrappers::ProcessExecutionTest);
-    RUN_TEST(wrappers::DBusExecutionTest);
+public:
+    FlattenTest();
 
-    RUN_TEST(base::TransformTest);
-    RUN_TEST(base::FlattenTest);
+private Q_SLOTS:
+    void initTestCase();
+    void testFlatten();
+    void cleanupTestCase();
 
-    return 1;
-}
+private:
+    QProcess *m_process1;
+    QProcess *m_process2;
+
+};
+
+} // namespace base
+
+#endif // TEST_FLATTEN_H
 
