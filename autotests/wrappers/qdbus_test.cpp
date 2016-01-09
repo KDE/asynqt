@@ -46,8 +46,8 @@ void DBusExecutionTest::testDBusExecution()
 
     qDebug() << "DBus returned " << result << " for the id";
 
-    QCOMPARE(result.length(),
-             QString("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx").length());
+    QCOMPARE(result.size(),
+             QString("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx").size());
 }
 
 void DBusExecutionTest::testDBusExecutionWithArgument()

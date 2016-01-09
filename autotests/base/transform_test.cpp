@@ -41,7 +41,7 @@ void TransformTest::testTransform()
     auto transformedFuture = AsynQt::transform(future,
         [] (const QString &input) {
             qDebug() << "Result: " << input;
-            return input.length();
+            return input.size();
         });
 
     QVERIFY(waitForFuture(transformedFuture, 1 _seconds));
