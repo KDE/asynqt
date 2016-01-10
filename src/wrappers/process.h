@@ -30,13 +30,15 @@
 
 namespace AsynQt {
 
-template <typename _Result, typename _Function>
-QFuture<_Result> makeFuture(QProcess *process, _Function map)
+template <typename _Function>
+auto makeFuture(QProcess *process, _Function map)
+        -> QFuture<decltype(map(Q_NULLPTR))>
 {
     using namespace detail;
 
     auto futureInterface =
-        new ProcessFutureInterface<_Result, _Function>(process, map);
+        new ProcessFutureInterface<decltype(map(Q_NULLPTR)), _Function>
+            (process, map);
 
     return futureInterface->start();
 }
@@ -55,8 +57,7 @@ namespace Process {
         process->setProgram(command);
         process->setArguments(arguments);
 
-        return AsynQt::makeFuture<decltype(map(Q_NULLPTR))>(
-            process, std::forward<_Function>(map));
+        return AsynQt::makeFuture(process, std::forward<_Function>(map));
     }
 
     ASYNQT_EXPORT
