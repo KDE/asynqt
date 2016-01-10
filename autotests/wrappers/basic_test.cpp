@@ -19,7 +19,7 @@
 
 #include "basic_test.h"
 
-#include <wrappers/common.h>
+#include <basic/all.h>
 
 #include <QFuture>
 #include <QCoreApplication>
@@ -81,19 +81,20 @@ void BasicFuturesTest::testCanceledFutures()
 
 void BasicFuturesTest::testDelayedFutures()
 {
-    auto waitFor = 3000; // milliseconds
+    auto delay = 1 _seconds;
+    auto error = 100 _milliseconds;
 
     {
-        auto future = AsynQt::makeDelayedFuture(42, waitFor);
+        auto future = AsynQt::makeDelayedFuture(42, delay);
 
-        COMPARE_BETWEEN(future, 42, 2 _seconds, 4 _seconds);
+        COMPARE_BETWEEN(future, 42, delay - error, delay + error);
         VERIFY_TYPE(future, QFuture<int>);
     }
 
     {
-        auto future = AsynQt::makeDelayedFuture(waitFor);
+        auto future = AsynQt::makeDelayedFuture(delay);
 
-        QVERIFY(waitForFuture(future, 2 _seconds, 4 _seconds));
+        QVERIFY(waitForFuture(future, delay - error, delay + error));
         VERIFY_TYPE(future, QFuture<void>);
     }
 }
@@ -101,39 +102,23 @@ void BasicFuturesTest::testDelayedFutures()
 void BasicFuturesTest::testDelayedFuturesStdChrono()
 {
     using namespace std::chrono;
+    auto delay = 1 _seconds;
+    auto error = 100 _milliseconds;
 
     {
-        auto future = AsynQt::makeDelayedFuture(42, seconds(3));
+        auto future = AsynQt::makeDelayedFuture(42, seconds(1));
 
-        COMPARE_BETWEEN(future, 42, 2 _seconds, 4 _seconds);
+        COMPARE_BETWEEN(future, 42, delay - error, delay + error);
         VERIFY_TYPE(future, QFuture<int>);
     }
 
     {
-        auto future = AsynQt::makeDelayedFuture(milliseconds(3000));
+        auto future = AsynQt::makeDelayedFuture(milliseconds(1000));
 
-        QVERIFY(waitForFuture(future, 2 _seconds, 4 _seconds));
+        QVERIFY(waitForFuture(future, delay - error, delay + error));
         VERIFY_TYPE(future, QFuture<void>);
     }
 }
-
-// void DBus
-//
-//     auto future = AsynQt::DBus::asyncCall<QString>(m_dbus, "GetId");
-//
-//     QVERIFY(waitForFuture(future, 1 _seconds));
-//
-//     auto result = future.result();
-//
-//     qDebug() << "DBus returned " << result << " for the id";
-//
-//     QCOMPARE(result.size(),
-//              QString("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx").size());
-// }
-//
-// void DBusExecutionTest::testDBusExecutionWithArgument()
-// {
-// }
 
 void BasicFuturesTest::initTestCase()
 {

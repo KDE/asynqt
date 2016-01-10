@@ -24,77 +24,11 @@
 #include <QFuture>
 #include <QFutureInterface>
 
-#include <asynqt_export.h>
+#include <asynqt/asynqt_export.h>
+
+#include "../private/wrappers/process_p.h"
 
 namespace AsynQt {
-
-namespace detail {
-
-    template <typename _Result, typename _Function>
-    class ProcessFutureInterface : public QObject,
-                                   public QFutureInterface<_Result> {
-
-    public:
-        ProcessFutureInterface(QProcess *process, _Function map)
-            : m_process(process)
-            , m_map(map)
-        {
-        }
-
-        void error()
-        {
-            this->reportCanceled();
-        }
-
-        QFuture<_Result> start()
-        {
-            QObject::connect(
-                    m_process,
-                    // Pretty new Qt connect syntax :)
-                    (void (QProcess::*)(QProcess::ProcessError)) &QProcess::error,
-                    this, [this] (QProcess::ProcessError) {
-                        this->error();
-                    });
-
-            QObject::connect(
-                    m_process,
-                    // Pretty new Qt connect syntax :)
-                    (void (QProcess::*)(int, QProcess::ExitStatus)) &QProcess::finished,
-                    this, [this] (int, QProcess::ExitStatus) {
-                        this->finished();
-                    });
-
-            this->reportStarted();
-
-            m_process->start();
-
-            return this->future();
-        }
-
-        void finished();
-
-
-    private:
-        QProcess *m_process;
-        _Function m_map;
-
-    };
-
-    template <typename _Result, typename _Function>
-    void ProcessFutureInterface<_Result, _Function>::finished()
-    {
-        if (m_process->exitCode() == 0
-                && m_process->exitStatus() == QProcess::NormalExit) {
-
-            this->reportResult(m_map(m_process));
-            this->reportFinished();
-
-        } else {
-            this->reportCanceled();
-        }
-    }
-
-} // namespace detail
 
 template <typename _Result, typename _Function>
 QFuture<_Result> makeFuture(QProcess *process, _Function map)

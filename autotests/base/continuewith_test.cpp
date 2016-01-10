@@ -20,7 +20,7 @@
 #include "continuewith_test.h"
 
 #include <wrappers/process.h>
-#include <base/continuewith.h>
+#include <operations/continuewith.h>
 
 #include <QFuture>
 #include <QCoreApplication>

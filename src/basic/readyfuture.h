@@ -17,45 +17,33 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "transform_test.h"
+#ifndef ASYNQT_CONS_READY_FUTURE_H
+#define ASYNQT_CONS_READY_FUTURE_H
 
-#include <wrappers/process.h>
-#include <operations/transform.h>
+#include <asynqt/asynqt_export.h>
 
 #include <QFuture>
-#include <QCoreApplication>
-#include <QtTest>
+#include <QFutureInterface>
+#include <QObject>
+#include <QTimer>
 
-#include "common.h"
+#include "../private/basic/readyfuture_p.h"
 
-namespace base {
+namespace AsynQt {
 
-TransformTest::TransformTest()
+template <typename _Result>
+QFuture<_Result> makeReadyFuture(_Result &&value)
 {
+    using namespace detail;
+
+    return (new ReadyFutureInterface<_Result>(std::forward<_Result>(value)))
+        ->start();
 }
 
-void TransformTest::testTransform()
-{
-    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
+ASYNQT_EXPORT
+QFuture<void> makeReadyFuture();
 
-    auto transformedFuture = AsynQt::transform(future,
-        [] (const QString &input) {
-            qDebug() << "Result: " << input;
-            return input.size();
-        });
+} // namespace AsynQt
 
-    COMPARE_AFTER(transformedFuture, 10, 1 _seconds);
-    VERIFY_TYPE(future, QFuture<QByteArray>);
-    VERIFY_TYPE(transformedFuture, QFuture<int>);
-}
-
-void TransformTest::initTestCase()
-{
-}
-
-void TransformTest::cleanupTestCase()
-{
-}
-
-} // namespace base
+#endif // ASYNQT_CONS_READY_FUTURE_H
 

@@ -9,9 +9,11 @@ set (
 
    version.cpp
 
-   wrappers/common.cpp
-
    wrappers/process.cpp
+   version.cpp
+   basic/readyfuture.cpp
+   basic/delayedfuture.cpp
+   basic/canceledfuture.cpp
 
    )
 
@@ -21,8 +23,13 @@ add_library (
    )
 add_library (KF5::AsynQt ALIAS KF5AsynQt)
 
-# include_directories (
-#    )
+message(
+   ">>>>>>>>>>> ${CMAKE_CURRENT_BINARY_DIR}/asynqt"
+   )
+
+include_directories (
+   ${CMAKE_CURRENT_BINARY_DIR}
+   )
 
 set_target_properties (
    KF5AsynQt
@@ -49,16 +56,26 @@ target_include_directories (
 
 # install
 generate_export_header (KF5AsynQt BASE_NAME AsynQt)
+file (
+   COPY
+       ${CMAKE_CURRENT_BINARY_DIR}/asynqt_export.h
+   DESTINATION
+       ${CMAKE_CURRENT_BINARY_DIR}/asynqt/
+   )
+
+install (
+   FILES ${CMAKE_CURRENT_BINARY_DIR}/asynqt/asynqt_export.h
+   DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5}/AsynQt/asynqt
+   COMPONENT Devel
+   )
+
+# Generate top level headers
 
 ecm_generate_headers (
    AsynQt_CamelCase_HEADERS
    HEADER_NAMES
    Version
-   wrappers/Common
-   wrappers/DBus
-   wrappers/Process
    PREFIX AsynQt
-   REQUIRED_HEADERS AsynQt_HEADERS
    )
 
 install (
@@ -67,11 +84,86 @@ install (
    COMPONENT Devel
    )
 
+# Generate basic headers
+
+ecm_generate_headers (
+   AsynQt_Basic_CamelCase_HEADERS
+   HEADER_NAMES
+      CanceledFuture
+      DelayedFuture
+      ReadyFuture
+   PREFIX AsynQt/Basic
+   RELATIVE basic
+   )
+
 install (
-   FILES ${AsynQt_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/asynqt_export.h
-   DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5}/AsynQt/asynqt
+   FILES ${AsynQt_Basic_CamelCase_HEADERS}
+   DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5}/AsynQt/AsynQt/Basic
    COMPONENT Devel
    )
+
+# Generate operations headers
+
+ecm_generate_headers (
+   AsynQt_Operations_CamelCase_HEADERS
+   HEADER_NAMES
+      ContinueWith
+      Flatten
+      Transform
+   PREFIX AsynQt/Operations
+   RELATIVE operations
+   )
+
+install (
+   FILES ${AsynQt_Operations_CamelCase_HEADERS}
+   DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5}/AsynQt/AsynQt/Operations
+   COMPONENT Devel
+   )
+
+# Generate wrappers headers
+
+ecm_generate_headers (
+   AsynQt_Wrappers_CamelCase_HEADERS
+   HEADER_NAMES
+      DBus
+      Process
+      PREFIX AsynQt/Wrappers
+   RELATIVE wrappers
+   )
+
+install (
+   FILES ${AsynQt_Wrappers_CamelCase_HEADERS}
+   DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5}/AsynQt/AsynQt/Wrappers
+   COMPONENT Devel
+   )
+
+
+# Install ugly headers
+
+set (AsynQt_Ugly_HEADERS
+   private/wrappers/process_p.h
+   private/wrappers/dbus_p.h
+   private/basic/delayedfuture_p.h
+   private/basic/canceledfuture_p.h
+   private/basic/readyfuture_p.h
+   private/operations/flatten_p.h
+   private/operations/transform_p.h
+   wrappers/dbus.h
+   wrappers/process.h
+   version.h
+   basic/delayedfuture.h
+   basic/readyfuture.h
+   basic/canceledfuture.h
+   basic/all.h
+   operations/transform.h
+   operations/flatten.h
+   operations/continuewith.h
+   )
+
+foreach (header ${AsynQt_Ugly_HEADERS})
+    get_filename_component (dir ${header} DIRECTORY)
+    install (FILES ${header} DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5}/AsynQt/asynqt/${dir})
+endforeach()
 
 install (
    TARGETS KF5AsynQt

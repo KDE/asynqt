@@ -20,7 +20,7 @@
 #include "flatten_test.h"
 
 #include <wrappers/process.h>
-#include <base/flatten.h>
+#include <operations/flatten.h>
 
 #include <QFuture>
 #include <QCoreApplication>

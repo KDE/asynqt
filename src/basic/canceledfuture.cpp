@@ -17,45 +17,5 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "transform_test.h"
-
-#include <wrappers/process.h>
-#include <operations/transform.h>
-
-#include <QFuture>
-#include <QCoreApplication>
-#include <QtTest>
-
-#include "common.h"
-
-namespace base {
-
-TransformTest::TransformTest()
-{
-}
-
-void TransformTest::testTransform()
-{
-    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
-
-    auto transformedFuture = AsynQt::transform(future,
-        [] (const QString &input) {
-            qDebug() << "Result: " << input;
-            return input.size();
-        });
-
-    COMPARE_AFTER(transformedFuture, 10, 1 _seconds);
-    VERIFY_TYPE(future, QFuture<QByteArray>);
-    VERIFY_TYPE(transformedFuture, QFuture<int>);
-}
-
-void TransformTest::initTestCase()
-{
-}
-
-void TransformTest::cleanupTestCase()
-{
-}
-
-} // namespace base
+#include "canceledfuture.h"
 

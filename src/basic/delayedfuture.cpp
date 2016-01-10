@@ -17,32 +17,11 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "common.h"
+#include "delayedfuture.h"
 
 namespace AsynQt {
 
 namespace detail {
-    class ReadyVoidFutureInterface
-        : public QObject
-        , QFutureInterface<void> {
-
-    public:
-        ReadyVoidFutureInterface()
-        {
-        }
-
-        QFuture<void> start()
-        {
-            auto future = this->future();
-
-            this->reportStarted();
-            this->reportFinished();
-
-            deleteLater();
-
-            return future;
-        }
-    };
 
     class DelayedVoidFutureInterface
         : public QObject
@@ -75,12 +54,6 @@ namespace detail {
     };
 
 } // namespace detail
-
-QFuture<void> makeReadyFuture()
-{
-    using namespace detail;
-    return (new ReadyVoidFutureInterface())->start();
-}
 
 QFuture<void> makeDelayedFuture(int milliseconds)
 {

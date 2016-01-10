@@ -17,45 +17,40 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "transform_test.h"
+#include "readyfuture.h"
 
-#include <wrappers/process.h>
-#include <operations/transform.h>
+namespace AsynQt {
 
-#include <QFuture>
-#include <QCoreApplication>
-#include <QtTest>
+namespace detail {
+    class ReadyVoidFutureInterface
+        : public QObject
+        , QFutureInterface<void> {
 
-#include "common.h"
+    public:
+        ReadyVoidFutureInterface()
+        {
+        }
 
-namespace base {
+        QFuture<void> start()
+        {
+            auto future = this->future();
 
-TransformTest::TransformTest()
+            this->reportStarted();
+            this->reportFinished();
+
+            deleteLater();
+
+            return future;
+        }
+    };
+
+} // namespace detail
+
+QFuture<void> makeReadyFuture()
 {
+    using namespace detail;
+    return (new ReadyVoidFutureInterface())->start();
 }
 
-void TransformTest::testTransform()
-{
-    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
-
-    auto transformedFuture = AsynQt::transform(future,
-        [] (const QString &input) {
-            qDebug() << "Result: " << input;
-            return input.size();
-        });
-
-    COMPARE_AFTER(transformedFuture, 10, 1 _seconds);
-    VERIFY_TYPE(future, QFuture<QByteArray>);
-    VERIFY_TYPE(transformedFuture, QFuture<int>);
-}
-
-void TransformTest::initTestCase()
-{
-}
-
-void TransformTest::cleanupTestCase()
-{
-}
-
-} // namespace base
+} // namespace AsynQt
 

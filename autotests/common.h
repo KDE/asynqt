@@ -37,15 +37,16 @@
 // We can not use user-defined literals yet, but we want to make this
 // prettier
 
-#define _seconds
+#define _milliseconds
+#define _seconds * 1000
 
 template <typename Future>
-inline bool waitForFuture(Future f, int seconds)
+inline bool waitForFuture(Future f, int milliseconds)
 {
     QElapsedTimer timer;
     timer.start();
 
-    while (timer.elapsed() < seconds * 1000 && !f.isFinished()) {
+    while (timer.elapsed() < milliseconds && !f.isFinished()) {
         QCoreApplication::processEvents();
     }
 
@@ -53,16 +54,16 @@ inline bool waitForFuture(Future f, int seconds)
 }
 
 template <typename Future>
-inline bool waitForFuture(Future f, int minSeconds, int maxSeconds)
+inline bool waitForFuture(Future f, int minMilliseconds, int maxMilliseconds)
 {
     QElapsedTimer timer;
     timer.start();
 
-    while (timer.elapsed() < maxSeconds * 1000 && !f.isFinished()) {
+    while (timer.elapsed() < maxMilliseconds && !f.isFinished()) {
         QCoreApplication::processEvents();
     }
 
-    if (timer.elapsed() < minSeconds * 1000) {
+    if (timer.elapsed() < minMilliseconds) {
         qWarning() << "Future came earlier than it was supposed to";
         return false;
     }
@@ -83,5 +84,4 @@ inline bool waitForFuture(Future f, int minSeconds, int maxSeconds)
 
 
 #endif // TESTS_COMMON_H
-
 

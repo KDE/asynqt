@@ -22,7 +22,8 @@
 
 /** @file version.h <AsynQt/Version> */
 
-#include "asynqt_export.h"
+#include <asynqt/asynqt_export.h>
+// #include "asynqt_export.h"
 
 /**
  * String version of libAsynQt version, suitable for use in

@@ -17,45 +17,28 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "transform_test.h"
-
-#include <wrappers/process.h>
-#include <operations/transform.h>
+#ifndef ASYNQT_BASE_FLATTEN_H
+#define ASYNQT_BASE_FLATTEN_H
 
 #include <QFuture>
-#include <QCoreApplication>
-#include <QtTest>
+#include <QFutureWatcher>
 
-#include "common.h"
+#include <type_traits>
+#include <memory>
 
-namespace base {
+#include "../private/operations/flatten_p.h"
 
-TransformTest::TransformTest()
+namespace AsynQt {
+
+template <typename _Result>
+QFuture<_Result> flatten(const QFuture<QFuture<_Result>> &future)
 {
+    using namespace detail;
+
+    return (new FlattenFutureInterface<_Result>(future))->start();
 }
 
-void TransformTest::testTransform()
-{
-    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
+} // namespace AsynQt
 
-    auto transformedFuture = AsynQt::transform(future,
-        [] (const QString &input) {
-            qDebug() << "Result: " << input;
-            return input.size();
-        });
-
-    COMPARE_AFTER(transformedFuture, 10, 1 _seconds);
-    VERIFY_TYPE(future, QFuture<QByteArray>);
-    VERIFY_TYPE(transformedFuture, QFuture<int>);
-}
-
-void TransformTest::initTestCase()
-{
-}
-
-void TransformTest::cleanupTestCase()
-{
-}
-
-} // namespace base
+#endif // ASYNQT_BASE_FLATTEN_H
 

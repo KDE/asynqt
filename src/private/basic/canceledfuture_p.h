@@ -17,45 +17,46 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "transform_test.h"
+//
+// W A R N I N G
+// -------------
+//
+// This file is not part of the AsynQt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
-#include <wrappers/process.h>
-#include <operations/transform.h>
+namespace AsynQt {
 
-#include <QFuture>
-#include <QCoreApplication>
-#include <QtTest>
+namespace detail {
 
-#include "common.h"
+template <typename _Result>
+class CanceledFutureInterface
+    : public QObject
+    , public QFutureInterface<_Result> {
 
-namespace base {
+public:
+    CanceledFutureInterface()
+    {
+    }
 
-TransformTest::TransformTest()
-{
-}
+    QFuture<_Result> start()
+    {
+        auto future = this->future();
 
-void TransformTest::testTransform()
-{
-    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
+        this->reportStarted();
+        this->reportCanceled();
 
-    auto transformedFuture = AsynQt::transform(future,
-        [] (const QString &input) {
-            qDebug() << "Result: " << input;
-            return input.size();
-        });
+        deleteLater();
 
-    COMPARE_AFTER(transformedFuture, 10, 1 _seconds);
-    VERIFY_TYPE(future, QFuture<QByteArray>);
-    VERIFY_TYPE(transformedFuture, QFuture<int>);
-}
+        return future;
+    }
 
-void TransformTest::initTestCase()
-{
-}
+};
 
-void TransformTest::cleanupTestCase()
-{
-}
+} // namespace detail
 
-} // namespace base
+} // namespace AsynQt
 

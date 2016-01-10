@@ -30,63 +30,9 @@
 
 #include <memory>
 
+#include "../private/wrappers/dbus_p.h"
+
 namespace AsynQt {
-
-namespace detail {
-
-    template <typename _Result>
-    class DBusCallFutureInterface : public QObject,
-                                    public QFutureInterface<_Result> {
-    public:
-        DBusCallFutureInterface(QDBusPendingReply<_Result> reply)
-            : reply(reply)
-        {
-        }
-
-        ~DBusCallFutureInterface()
-        {
-        }
-
-        void callFinished();
-
-        QFuture<_Result> start()
-        {
-            replyWatcher.reset(new QDBusPendingCallWatcher(reply));
-
-            QObject::connect(replyWatcher.get(),
-                             &QDBusPendingCallWatcher::finished,
-                             [this] () { callFinished(); });
-
-            this->reportStarted();
-
-            if (reply.isFinished()) {
-                this->callFinished();
-            }
-
-            return this->future();
-        }
-
-    private:
-        QDBusPendingReply<_Result> reply;
-        std::unique_ptr<QDBusPendingCallWatcher> replyWatcher;
-    };
-
-    template <typename _Result>
-    void DBusCallFutureInterface<_Result>::callFinished()
-    {
-        deleteLater();
-
-        if (!reply.isError()) {
-            this->reportResult(reply.value());
-        }
-
-        this->reportFinished();
-    }
-
-    template <>
-    void DBusCallFutureInterface<void>::callFinished();
-
-}
 
 namespace DBus {
 
