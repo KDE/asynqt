@@ -28,10 +28,11 @@ QFuture<QProcess*> exec(const QString &command, const QStringList &arguments)
                             [](QProcess *process) { return process; });
 }
 
-QFuture<QString> getOutput(const QString &command, const QStringList &arguments)
+QFuture<QByteArray> getOutput(const QString &command,
+                              const QStringList &arguments)
 {
     return exec(command, arguments, [](QProcess *process) {
-        return QString::fromLatin1(process->readAllStandardOutput());
+        return process->readAllStandardOutput();
     });
 }
 

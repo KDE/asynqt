@@ -45,7 +45,7 @@ void TransformTest::testTransform()
         });
 
     QCOMPAREAFTER(transformedFuture, 10, 1 _seconds);
-    QVERIFYTYPE(future, QFuture<QString>);
+    QVERIFYTYPE(future, QFuture<QByteArray>);
     QVERIFYTYPE(transformedFuture, QFuture<int>);
 }
 

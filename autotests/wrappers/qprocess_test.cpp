@@ -69,7 +69,7 @@ void ProcessExecutionTest::testProcessOutput()
 
     QVERIFY(waitForFuture(future, 1 _seconds));
 
-    QCOMPARE(future.result(), QString("Hello KDE\n"));
+    QCOMPARE(future.result(), QByteArray("Hello KDE\n"));
 
 }
 

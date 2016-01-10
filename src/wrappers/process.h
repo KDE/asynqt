@@ -130,8 +130,8 @@ namespace Process {
                              const QStringList &arguments);
 
     ASYNQT_EXPORT
-    QFuture<QString> getOutput(const QString &command,
-                               const QStringList &arguments);
+    QFuture<QByteArray> getOutput(const QString &command,
+                                  const QStringList &arguments);
 
 } // namespace Process
 

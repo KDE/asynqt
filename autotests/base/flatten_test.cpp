@@ -34,7 +34,7 @@ FlattenTest::FlattenTest()
 {
 }
 
-QFuture<QString> execEcho(const QString &message)
+QFuture<QByteArray> execEcho(const QString &message)
 {
     return AsynQt::Process::getOutput("echo", { message.trimmed() });
 }
@@ -49,10 +49,10 @@ void FlattenTest::testFlatten()
 
     auto flattenFuture = AsynQt::flatten(future);
 
-    QCOMPAREAFTER(flattenFuture, QString("Hello KDE!\n"), 1 _seconds);
+    QCOMPAREAFTER(flattenFuture, QByteArray("Hello KDE!\n"), 1 _seconds);
 
-    QVERIFYTYPE(future, QFuture<QFuture<QString>>);
-    QVERIFYTYPE(flattenFuture, QFuture<QString>);
+    QVERIFYTYPE(future, QFuture<QFuture<QByteArray>>);
+    QVERIFYTYPE(flattenFuture, QFuture<QByteArray>);
 }
 
 void FlattenTest::initTestCase()
