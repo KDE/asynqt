@@ -35,6 +35,7 @@ public:
 private Q_SLOTS:
     void initTestCase();
     void testContinueWith();
+    void testContinueWithOperator();
     void cleanupTestCase();
 
 private:

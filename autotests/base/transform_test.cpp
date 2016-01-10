@@ -44,9 +44,9 @@ void TransformTest::testTransform()
             return input.size();
         });
 
-    QVERIFY(waitForFuture(transformedFuture, 1 _seconds));
-
-    QCOMPARE(transformedFuture.result(), 10);
+    QCOMPAREAFTER(transformedFuture, 10, 1 _seconds);
+    QVERIFYTYPE(future, QFuture<QString>);
+    QVERIFYTYPE(transformedFuture, QFuture<int>);
 }
 
 void TransformTest::initTestCase()

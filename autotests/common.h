@@ -23,8 +23,10 @@
 #include <QElapsedTimer>
 #include <QCoreApplication>
 
+#include <type_traits>
+
 #define RUN_TEST(Type)                                                         \
-    if (QCoreApplication::arguments().isEmpty()                                \
+    if (QCoreApplication::arguments().size() < 2                               \
             || QCoreApplication::arguments().contains(#Type)) {                \
         Type test;                                                             \
         QTest::qExec(&test);                                                   \
@@ -49,6 +51,13 @@ inline bool waitForFuture(Future f, int seconds)
 
     return f.isFinished();
 }
+
+#define QCOMPAREAFTER(Future, Value, Time)                                     \
+        QVERIFY(waitForFuture(Future, Time));                                  \
+        QCOMPARE(Future.result(), Value)
+
+#define QVERIFYTYPE(Variable, Type)                                            \
+        QVERIFY((std::is_same<decltype(Variable), Type>::value))
 
 
 #endif // TESTS_COMMON_H

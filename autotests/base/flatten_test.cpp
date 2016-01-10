@@ -49,9 +49,10 @@ void FlattenTest::testFlatten()
 
     auto flattenFuture = AsynQt::flatten(future);
 
-    QVERIFY(waitForFuture(flattenFuture, 1 _seconds));
+    QCOMPAREAFTER(flattenFuture, QString("Hello KDE!\n"), 1 _seconds);
 
-    QCOMPARE(flattenFuture.result(), QString("Hello KDE!\n"));
+    QVERIFYTYPE(future, QFuture<QFuture<QString>>);
+    QVERIFYTYPE(flattenFuture, QFuture<QString>);
 }
 
 void FlattenTest::initTestCase()

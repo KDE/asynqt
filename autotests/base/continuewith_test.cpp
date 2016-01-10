@@ -28,6 +28,8 @@
 
 #include "common.h"
 
+using namespace AsynQt;
+
 namespace base {
 
 ContinueWithTest::ContinueWithTest()
@@ -35,21 +37,58 @@ ContinueWithTest::ContinueWithTest()
 }
 
 namespace {
+    QString helloKdeMessage = "Hello KDE!\n";
+
+    QFuture<QString> execHelloKde()
+    {
+        return Process::getOutput("echo", { helloKdeMessage.trimmed() });
+    }
+
     QFuture<QString> execEcho(const QString &message)
     {
-        return AsynQt::Process::getOutput("echo", { message.trimmed() });
+        return Process::getOutput("echo", { message.trimmed() });
     }
 }
 
 void ContinueWithTest::testContinueWith()
 {
-    QFuture<QString> future = AsynQt::Process::getOutput("echo", { "Hello KDE!" });
+    {
+        auto future = execHelloKde();
+        auto connectedFuture = continueWith(future, execEcho);
 
-    QFuture<QString> connectedFuture = AsynQt::continueWith(future, execEcho);
+        QCOMPAREAFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        QVERIFYTYPE(future, QFuture<QString>);
+        QVERIFYTYPE(connectedFuture, QFuture<QString>);
+    }
 
-    QVERIFY(waitForFuture(connectedFuture, 1 _seconds));
+    {
+        auto connectedFuture =
+            continueWith(execHelloKde(), execEcho);
 
-    QCOMPARE(connectedFuture.result(), QString("Hello KDE!\n"));
+        QCOMPAREAFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        QVERIFYTYPE(connectedFuture, QFuture<QString>);
+    }
+}
+
+void ContinueWithTest::testContinueWithOperator()
+{
+    using namespace AsynQt::operators;
+
+    {
+        auto future = execHelloKde();
+        auto connectedFuture = future | execEcho;
+
+        QCOMPAREAFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        QVERIFYTYPE(future, QFuture<QString>);
+        QVERIFYTYPE(connectedFuture, QFuture<QString>);
+    }
+
+    {
+        auto connectedFuture = execHelloKde() | execEcho;
+
+        QCOMPAREAFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        QVERIFYTYPE(connectedFuture, QFuture<QString>);
+    }
 }
 
 void ContinueWithTest::initTestCase()
