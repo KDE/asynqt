@@ -8,6 +8,9 @@ set (
    AsynQt_LIB_SRCS
 
    version.cpp
+
+   wrappers/common.cpp
+
    wrappers/process.cpp
 
    )

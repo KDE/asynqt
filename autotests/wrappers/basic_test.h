@@ -17,45 +17,31 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "transform_test.h"
+#ifndef TEST_BASIC_FUTURES_H
+#define TEST_BASIC_FUTURES_H
 
-#include <wrappers/process.h>
-#include <base/transform.h>
+#include <QObject>
 
-#include <QFuture>
-#include <QCoreApplication>
-#include <QtTest>
+namespace wrappers {
 
-#include "common.h"
+class BasicFuturesTest : public QObject {
+    Q_OBJECT
 
-namespace base {
+public:
+    BasicFuturesTest();
 
-TransformTest::TransformTest()
-{
-}
+private Q_SLOTS:
+    void initTestCase();
+    void testReadyFutures();
+    void testCanceledFutures();
+    void testDelayedFutures();
+    void testDelayedFuturesStdChrono();
+    void cleanupTestCase();
 
-void TransformTest::testTransform()
-{
-    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
 
-    auto transformedFuture = AsynQt::transform(future,
-        [] (const QString &input) {
-            qDebug() << "Result: " << input;
-            return input.size();
-        });
+};
 
-    COMPARE_AFTER(transformedFuture, 10, 1 _seconds);
-    VERIFY_TYPE(future, QFuture<QByteArray>);
-    VERIFY_TYPE(transformedFuture, QFuture<int>);
-}
+} // namespace wrappers
 
-void TransformTest::initTestCase()
-{
-}
-
-void TransformTest::cleanupTestCase()
-{
-}
-
-} // namespace base
+#endif // TEST_BASIC_FUTURES_H
 

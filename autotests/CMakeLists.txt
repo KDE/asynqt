@@ -16,6 +16,7 @@ set (
 
    wrappers/qprocess_test.cpp
    wrappers/qdbus_test.cpp
+   wrappers/basic_test.cpp
 
    base/transform_test.cpp
    base/flatten_test.cpp

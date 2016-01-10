@@ -52,11 +52,33 @@ inline bool waitForFuture(Future f, int seconds)
     return f.isFinished();
 }
 
-#define QCOMPAREAFTER(Future, Value, Time)                                     \
+template <typename Future>
+inline bool waitForFuture(Future f, int minSeconds, int maxSeconds)
+{
+    QElapsedTimer timer;
+    timer.start();
+
+    while (timer.elapsed() < maxSeconds * 1000 && !f.isFinished()) {
+        QCoreApplication::processEvents();
+    }
+
+    if (timer.elapsed() < minSeconds * 1000) {
+        qWarning() << "Future came earlier than it was supposed to";
+        return false;
+    }
+
+    return f.isFinished();
+}
+
+#define COMPARE_AFTER(Future, Value, Time)                                     \
         QVERIFY(waitForFuture(Future, Time));                                  \
         QCOMPARE(Future.result(), Value)
 
-#define QVERIFYTYPE(Variable, Type)                                            \
+#define COMPARE_BETWEEN(Future, Value, TimeMin, TimeMax)                       \
+        QVERIFY(waitForFuture(Future, TimeMin, TimeMax));                      \
+        QCOMPARE(Future.result(), Value)
+
+#define VERIFY_TYPE(Variable, Type)                                            \
         QVERIFY((std::is_same<decltype(Variable), Type>::value))
 
 

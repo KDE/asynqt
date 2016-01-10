@@ -19,13 +19,15 @@
 
 #include "common.h"
 
+namespace AsynQt {
+
 namespace detail {
-    class VoidFutureInterface
+    class ReadyVoidFutureInterface
         : public QObject
         , QFutureInterface<void> {
 
     public:
-        VoidFutureInterface()
+        ReadyVoidFutureInterface()
         {
         }
 
@@ -42,15 +44,49 @@ namespace detail {
         }
     };
 
+    class DelayedVoidFutureInterface
+        : public QObject
+        , QFutureInterface<void> {
+
+    public:
+        DelayedVoidFutureInterface(int milliseconds)
+            : m_milliseconds(milliseconds)
+        {
+        }
+
+        QFuture<void> start()
+        {
+            auto future = this->future();
+
+            this->reportStarted();
+
+            QTimer::singleShot(m_milliseconds, [this] {
+                this->reportFinished();
+                deleteLater();
+            });
+
+            deleteLater();
+
+            return future;
+        }
+
+    private:
+        int m_milliseconds;
+    };
+
 } // namespace detail
 
 QFuture<void> makeReadyFuture()
 {
     using namespace detail;
-
-    auto voidFutureInterface = new VoidFutureInterface();
-
-    return voidFutureInterface->start();
+    return (new ReadyVoidFutureInterface())->start();
 }
 
+QFuture<void> makeDelayedFuture(int milliseconds)
+{
+    using namespace detail;
+    return (new DelayedVoidFutureInterface(milliseconds))->start();
+}
+
+} // namespace AsynQt
 

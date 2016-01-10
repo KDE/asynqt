@@ -56,17 +56,17 @@ void ContinueWithTest::testContinueWith()
         auto future = execHelloKde();
         auto connectedFuture = continueWith(future, execEcho);
 
-        QCOMPAREAFTER(connectedFuture, helloKdeMessage, 1 _seconds);
-        QVERIFYTYPE(future, QFuture<QByteArray>);
-        QVERIFYTYPE(connectedFuture, QFuture<QByteArray>);
+        COMPARE_AFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        VERIFY_TYPE(future, QFuture<QByteArray>);
+        VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 
     {
         auto connectedFuture =
             continueWith(execHelloKde(), execEcho);
 
-        QCOMPAREAFTER(connectedFuture, helloKdeMessage, 1 _seconds);
-        QVERIFYTYPE(connectedFuture, QFuture<QByteArray>);
+        COMPARE_AFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 }
 
@@ -78,16 +78,16 @@ void ContinueWithTest::testContinueWithOperator()
         auto future = execHelloKde();
         auto connectedFuture = future | execEcho;
 
-        QCOMPAREAFTER(connectedFuture, helloKdeMessage, 1 _seconds);
-        QVERIFYTYPE(future, QFuture<QByteArray>);
-        QVERIFYTYPE(connectedFuture, QFuture<QByteArray>);
+        COMPARE_AFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        VERIFY_TYPE(future, QFuture<QByteArray>);
+        VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 
     {
         auto connectedFuture = execHelloKde() | execEcho;
 
-        QCOMPAREAFTER(connectedFuture, helloKdeMessage, 1 _seconds);
-        QVERIFYTYPE(connectedFuture, QFuture<QByteArray>);
+        COMPARE_AFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 }
 

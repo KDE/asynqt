@@ -25,6 +25,7 @@
 
 #include "wrappers/qprocess_test.h"
 #include "wrappers/qdbus_test.h"
+#include "wrappers/basic_test.h"
 
 #include "base/transform_test.h"
 #include "base/flatten_test.h"
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
 
     RUN_TEST(wrappers::ProcessExecutionTest);
     RUN_TEST(wrappers::DBusExecutionTest);
+    RUN_TEST(wrappers::BasicFuturesTest);
 
     RUN_TEST(base::TransformTest);
     RUN_TEST(base::FlattenTest);
