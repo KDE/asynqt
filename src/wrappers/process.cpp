@@ -24,8 +24,7 @@ namespace Process {
 
 QFuture<QProcess*> exec(const QString &command, const QStringList &arguments)
 {
-    return exec(command, arguments,
-                            [](QProcess *process) { return process; });
+  return exec(command, arguments, [](QProcess *process) { return process; });
 }
 
 QFuture<QByteArray> getOutput(const QString &command,

@@ -13,7 +13,6 @@ set (
    version.cpp
    basic/readyfuture.cpp
    basic/delayedfuture.cpp
-   basic/canceledfuture.cpp
 
    )
 
