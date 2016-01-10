@@ -34,8 +34,23 @@
 
 namespace AsynQt {
 
+/**
+ * Creates a future from the specified dbus reply
+ */
+template <typename _Result>
+QFuture<_Result> makeFuture(QDBusPendingReply<_Result> dbusReply)
+{
+    using namespace detail;
+
+    return (new DBusCallFutureInterface<_Result>(dbusReply))->start();
+}
+
 namespace DBus {
 
+/**
+ * Makes an asynchronous call to the specified DBus interface,
+ * and wraps the result in a future.
+ */
 template <typename _Result>
 QFuture<_Result>
 asyncCall(QDBusAbstractInterface *interface, const QString &method,
@@ -54,14 +69,6 @@ asyncCall(QDBusAbstractInterface *interface, const QString &method,
 }
 
 } // namespace DBus
-
-template <typename _Result>
-QFuture<_Result> makeFuture(QDBusPendingReply<_Result> dbusReply)
-{
-    using namespace detail;
-
-    return (new DBusCallFutureInterface<_Result>(dbusReply))->start();
-}
 
 } // namespace AsynQt
 

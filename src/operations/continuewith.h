@@ -31,6 +31,31 @@
 
 namespace AsynQt {
 
+/**
+ * This method is similar to `transform`,
+ * but it takes a transformation function (in this
+ * case, called a continuation) that does not
+ * return a normal value, but also a new future.
+ * It returns the future that will be returned
+ * by the continuation.
+ *
+ * It is equivalent to calling `flatten` on the result
+ * of the `transform` function when a continuation
+ * is passed to it.
+ *
+ * Example:
+ *
+ * <code>
+ *     QFuture<QString> input = getUserInput();
+ *     QFuture<Status> continueWith(input, [] (QString message) {
+ *          return server.send(message);
+ *     });
+ * </code>
+ *
+ * @arg future the future to connect the continuation to
+ * @arg continuation the continuation function
+ * @returns the future that the continuation will return
+ */
 template <typename _In, typename _Continuation>
 auto continueWith(const QFuture<_In> &future, _Continuation &&continuation)
     -> decltype(flatten(transform(future, std::forward<_Continuation>(continuation))))

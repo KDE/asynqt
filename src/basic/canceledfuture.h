@@ -31,6 +31,9 @@
 
 namespace AsynQt {
 
+/**
+ * Creates a canceled future.
+ */
 template <typename _Result = void>
 QFuture<_Result> makeCanceledFuture()
 {

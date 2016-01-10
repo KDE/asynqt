@@ -30,6 +30,15 @@
 
 namespace AsynQt {
 
+/**
+ * Takes a future of a future, and flattens it out.
+ *
+ * If any of the futures is canceled, the resulting future
+ * will be canceled as well.
+ *
+ * @arg future future that contains another future of type T
+ * @returns a single-level future of type T
+ */
 template <typename _Result>
 QFuture<_Result> flatten(const QFuture<QFuture<_Result>> &future)
 {

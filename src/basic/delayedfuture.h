@@ -31,6 +31,12 @@
 
 namespace AsynQt {
 
+/**
+ * Creates a future that will arrive in the specified number of milliseconds,
+ * and contain the specified value.
+ * @arg value value to return
+ * @arg milliseconds how much to wait in milliseconds until the future arrives
+ */
 template <typename _Result>
 QFuture<_Result> makeDelayedFuture(_Result &&value, int milliseconds)
 {
@@ -41,6 +47,10 @@ QFuture<_Result> makeDelayedFuture(_Result &&value, int milliseconds)
         ->start();
 }
 
+/**
+ * Creates a void future that will arrive in the specified
+ * number of milliseconds.
+ */
 ASYNQT_EXPORT
 QFuture<void> makeDelayedFuture(int milliseconds);
 
@@ -52,6 +62,15 @@ QFuture<void> makeDelayedFuture(int milliseconds);
 
 namespace AsynQt {
 
+/**
+ * Convenience method for using with std::chrono library. It allows
+ * type-safe syntax for specifying the duration (as of C++14)
+ *
+ * <code>
+ * makeDelayedFuture(42, 500ms);
+ * makeDelayedFuture(42, 1h + 30min);
+ * </code>
+ */
 template <typename _Result, typename Rep, typename Period>
 QFuture<_Result> makeDelayedFuture(_Result &&value,
                                    std::chrono::duration<Rep, Period> duration)
@@ -62,6 +81,15 @@ QFuture<_Result> makeDelayedFuture(_Result &&value,
                              duration_cast<milliseconds>(duration).count());
 }
 
+/**
+ * Convenience method for using with std::chrono library. It allows
+ * type-safe syntax for specifying the duration (as of C++14)
+ *
+ * <code>
+ * makeDelayedFuture(500ms);
+ * makeDelayedFuture(1h + 30min);
+ * </code>
+ */
 template <typename Rep, typename Period>
 QFuture<void> makeDelayedFuture(std::chrono::duration<Rep, Period> duration)
 {

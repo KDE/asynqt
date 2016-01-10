@@ -31,6 +31,10 @@
 
 namespace AsynQt {
 
+/**
+ * Creates a future that has already been completed,
+ * and that contains the specified value
+ */
 template <typename _Result>
 QFuture<_Result> makeReadyFuture(_Result &&value)
 {
@@ -40,6 +44,9 @@ QFuture<_Result> makeReadyFuture(_Result &&value)
         ->start();
 }
 
+/**
+ * Creates a void future that has already been completed.
+ */
 ASYNQT_EXPORT
 QFuture<void> makeReadyFuture();
 

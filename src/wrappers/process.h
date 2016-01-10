@@ -30,6 +30,19 @@
 
 namespace AsynQt {
 
+/**
+ * Creates a future that will be completed when the process finishes.
+ * @arg process process to wrap inside a future
+ * @arg map function that extracts the needed information from the process
+ *
+ * <code>
+ *     // If we want to get the exit code of the process
+ *     makeFuture(process, [] (QProcess *p) { return p->exitCode(); })
+ *
+ *     // If we want to get the output of the process
+ *     makeFuture(process, [] (QProcess *p) { return p->readAllStandardOutput(); })
+ * </code>
+ */
 template <typename _Function>
 auto makeFuture(QProcess *process, _Function map)
         -> QFuture<decltype(map(Q_NULLPTR))>
@@ -45,6 +58,9 @@ auto makeFuture(QProcess *process, _Function map)
 
 namespace Process {
 
+    /**
+     * Executes the specified command, with the specified arguments.
+     */
     template <typename _Function>
     auto exec(const QString &command, const QStringList &arguments,
                           _Function &&map)
@@ -60,10 +76,18 @@ namespace Process {
         return AsynQt::makeFuture(process, std::forward<_Function>(map));
     }
 
+    /**
+     * Executes the specified command, with the specified arguments,
+     * and returns the future containing the process it created.
+     */
     ASYNQT_EXPORT
     QFuture<QProcess *> exec(const QString &command,
                              const QStringList &arguments);
 
+    /**
+     * Executes the specified command, with the specified arguments,
+     * and it returns a future containing the output of that command.
+     */
     ASYNQT_EXPORT
     QFuture<QByteArray> getOutput(const QString &command,
                                   const QStringList &arguments);
