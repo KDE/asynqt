@@ -39,6 +39,8 @@ QFuture<_Result> makeCanceledFuture()
 {
     using namespace detail;
 
+    // No need to decay the type, expecting the user not to try
+    // and make a future of ref-to-type or anything that funny
     return (new CanceledFutureInterface<_Result>())->start();
 }
 
