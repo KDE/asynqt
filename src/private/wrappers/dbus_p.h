@@ -75,9 +75,12 @@ void DBusCallFutureInterface<_Result>::callFinished()
 
     if (!reply.isError()) {
         this->reportResult(reply.value());
-    }
+        this->reportFinished();
 
-    this->reportFinished();
+    } else {
+        this->reportCanceled();
+
+    }
 }
 
 template <>

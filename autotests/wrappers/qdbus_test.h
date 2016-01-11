@@ -35,6 +35,7 @@ private Q_SLOTS:
     void initTestCase();
     void testDBusExecution();
     void testDBusExecutionWithArgument();
+    void testDBusExecutionError();
     void cleanupTestCase();
 
 private:
