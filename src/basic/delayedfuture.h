@@ -38,12 +38,12 @@ namespace AsynQt {
  * @arg milliseconds how much to wait in milliseconds until the future arrives
  */
 template <typename _Result>
-QFuture<_Result> makeDelayedFuture(_Result &&value, int milliseconds)
+QFuture<typename std::decay<_Result>::type> makeDelayedFuture(_Result &&value,
+                                                              int milliseconds)
 {
     using namespace detail;
 
-    return (new DelayedFutureInterface<_Result>(std::forward<_Result>(value),
-                                                milliseconds))
+    return newDelayedFutureInterface(std::forward<_Result>(value), milliseconds)
         ->start();
 }
 
@@ -72,7 +72,7 @@ namespace AsynQt {
  * </code>
  */
 template <typename _Result, typename Rep, typename Period>
-QFuture<_Result> makeDelayedFuture(_Result &&value,
+QFuture<typename std::decay<_Result>::type> makeDelayedFuture(_Result &&value,
                                    std::chrono::duration<Rep, Period> duration)
 {
     using namespace std::chrono;

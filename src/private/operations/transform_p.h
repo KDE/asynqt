@@ -57,18 +57,22 @@ public:
     QFuture<result_type> start()
     {
         m_futureWatcher.reset(new QFutureWatcher<_In>());
-        m_futureWatcher->setFuture(m_future);
 
         QObject::connect(m_futureWatcher.get(),
                          &QFutureWatcherBase::finished,
                          [this] () { callFinished(); });
+        QObject::connect(m_futureWatcher.get(),
+                         &QFutureWatcherBase::canceled,
+                         [this] () { callFinished(); });
+
+        m_futureWatcher->setFuture(m_future);
 
         this->reportStarted();
 
-        if (m_future.isFinished()) {
-            qDebug() << "TransformFutureInterface::start() -- Already finished";
-            this->callFinished();
-        }
+        // if (m_future.isFinished()) {
+        //     qDebug() << "TransformFutureInterface::start() -- Already finished";
+        //     this->callFinished();
+        // }
 
         return this->future();
     }
@@ -87,9 +91,13 @@ void TransformFutureInterface<_In, _Transformation>::callFinished()
     if (m_future.isFinished()) {
         const auto result = m_future.result();
         this->reportResult(m_transormation(result));
+        this->reportFinished();
+
+    } else {
+        this->reportCanceled();
+
     }
 
-    this->reportFinished();
 }
 
 } // namespace detail

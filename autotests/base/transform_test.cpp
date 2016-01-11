@@ -49,6 +49,36 @@ void TransformTest::testTransform()
     VERIFY_TYPE(transformedFuture, QFuture<int>);
 }
 
+void TransformTest::testTransformWithCanceledFutures()
+{
+    auto future = fail(QString());
+
+    auto transformedFuture = AsynQt::transform(future,
+        [] (const QString &input) {
+            qDebug() << "Result: " << input;
+            return input.size();
+        });
+
+    CANCELED_AFTER(transformedFuture, 1 _seconds);
+    VERIFY_TYPE(future, QFuture<QString>);
+    VERIFY_TYPE(transformedFuture, QFuture<int>);
+}
+
+void TransformTest::testTransformWithReadyFutures()
+{
+    auto future = makeReadyFuture(helloKdeMessage);
+
+    auto transformedFuture = AsynQt::transform(future,
+        [] (const QString &input) {
+            qDebug() << "Result: " << input;
+            return input.size();
+        });
+
+    COMPARE_AFTER(transformedFuture, 11, 1 _seconds);
+    VERIFY_TYPE(future, QFuture<QByteArray>);
+    VERIFY_TYPE(transformedFuture, QFuture<int>);
+}
+
 void TransformTest::initTestCase()
 {
 }

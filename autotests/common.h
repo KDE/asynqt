@@ -25,6 +25,9 @@
 
 #include <type_traits>
 
+#include "basic/all.h"
+#include "wrappers/process.h"
+
 #define RUN_TEST(Type)                                                         \
     if (QCoreApplication::arguments().size() < 2                               \
             || QCoreApplication::arguments().contains(#Type)) {                \
@@ -79,9 +82,43 @@ inline bool waitForFuture(Future f, int minMilliseconds, int maxMilliseconds)
         QVERIFY(waitForFuture(Future, TimeMin, TimeMax));                      \
         QCOMPARE(Future.result(), Value)
 
+#define CANCELED_AFTER(Future, Time)                                           \
+        waitForFuture(Future, Time);                                           \
+        QVERIFY(Future.isCanceled())
+
 #define VERIFY_TYPE(Variable, Type)                                            \
         QVERIFY((std::is_same<decltype(Variable), Type>::value))
 
+#define TEST_CHUNK(Name) qDebug() << "Test: " << Name;
+
+namespace {
+    template <typename T>
+    struct debug_type;
+}
+
+#define DEBUG_TYPE(Variable) { debug_type<decltype(Variable)> error; }
+
+
+namespace {
+    using namespace AsynQt;
+
+    QByteArray helloKdeMessage = "Hello KDE!\n";
+
+    QFuture<QByteArray> execHelloKde()
+    {
+        return Process::getOutput("echo", { helloKdeMessage.trimmed() });
+    }
+
+    QFuture<QByteArray> execEcho(const QString &message)
+    {
+        return Process::getOutput("echo", { message.trimmed() });
+    }
+
+    QFuture<QString> fail(const QString &message)
+    {
+        return makeCanceledFuture<QString>();
+    }
+}
 
 #endif // TESTS_COMMON_H
 

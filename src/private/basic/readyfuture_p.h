@@ -60,6 +60,14 @@ private:
 
 };
 
+template <typename _Result>
+ReadyFutureInterface<typename std::decay<_Result>::type> *
+newReadyFutureInterface(_Result &&result)
+{
+    return new ReadyFutureInterface<typename std::decay<_Result>::type>(
+        std::forward<_Result>(result));
+}
+
 } // namespace detail
 } // namespace AsynQt
 

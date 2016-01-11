@@ -35,6 +35,8 @@ public:
 private Q_SLOTS:
     void initTestCase();
     void testTransform();
+    void testTransformWithCanceledFutures();
+    void testTransformWithReadyFutures();
     void cleanupTestCase();
 
 private:

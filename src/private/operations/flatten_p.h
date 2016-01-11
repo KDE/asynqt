@@ -51,16 +51,20 @@ public:
             m_secondFuture = m_firstFuture.result();
 
             m_secondFutureWatcher.reset(new QFutureWatcher<_Result>());
-            m_secondFutureWatcher->setFuture(m_secondFuture);
 
             QObject::connect(m_secondFutureWatcher.get(),
                              &QFutureWatcherBase::finished,
                              [this] () { secondCallFinished(); });
+            QObject::connect(m_secondFutureWatcher.get(),
+                             &QFutureWatcherBase::canceled,
+                             [this] () { secondCallFinished(); });
 
-            if (m_secondFuture.isFinished()) {
-                qDebug() << "FlattenFutureInterface::start() -- Second one already finished";
-                this->secondCallFinished();
-            }
+            m_secondFutureWatcher->setFuture(m_secondFuture);
+
+            // if (m_secondFuture.isFinished()) {
+            //     qDebug() << "FlattenFutureInterface::start() -- Second one already finished";
+            //     this->secondCallFinished();
+            // }
 
         } else {
             this->reportCanceled();
@@ -81,18 +85,26 @@ public:
     QFuture<_Result> start()
     {
         m_firstFutureWatcher.reset(new QFutureWatcher<QFuture<_Result>>());
-        m_firstFutureWatcher->setFuture(m_firstFuture);
 
         QObject::connect(m_firstFutureWatcher.get(),
                          &QFutureWatcherBase::finished,
                          [this] () { firstCallFinished(); });
+        QObject::connect(m_firstFutureWatcher.get(),
+                         &QFutureWatcherBase::canceled,
+                         [this] () { firstCallFinished(); });
+
+        m_firstFutureWatcher->setFuture(m_firstFuture);
 
         this->reportStarted();
 
-        if (m_firstFuture.isFinished()) {
-            qDebug() << "FlattenFutureInterface::start() -- Already finished";
-            this->firstCallFinished();
-        }
+        // if (m_firstFuture.isFinished()) {
+        //     qDebug() << "FlattenFutureInterface::start() -- Already finished";
+        //     this->firstCallFinished();
+        //
+        // } else if (m_firstFuture.isCanceled()) {
+        //     qDebug() << "FlattenFutureInterface::start() -- Already finished";
+        //     this->firstCallFinished();
+        // }
 
         return this->future();
     }

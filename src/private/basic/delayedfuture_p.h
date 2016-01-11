@@ -64,6 +64,14 @@ private:
 
 };
 
+template <typename _Result>
+DelayedFutureInterface<typename std::decay<_Result>::type> *
+newDelayedFutureInterface(_Result &&result, int milliseconds)
+{
+    return new DelayedFutureInterface<typename std::decay<_Result>::type>(
+        std::forward<_Result>(result), milliseconds);
+}
+
 } // namespace detail
 } // namespace AsynQt
 

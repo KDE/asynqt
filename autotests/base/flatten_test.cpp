@@ -34,11 +34,6 @@ FlattenTest::FlattenTest()
 {
 }
 
-QFuture<QByteArray> execEcho(const QString &message)
-{
-    return AsynQt::Process::getOutput("echo", { message.trimmed() });
-}
-
 void FlattenTest::testFlatten()
 {
     auto future = AsynQt::Process::exec(
@@ -53,6 +48,37 @@ void FlattenTest::testFlatten()
 
     VERIFY_TYPE(future, QFuture<QFuture<QByteArray>>);
     VERIFY_TYPE(flattenFuture, QFuture<QByteArray>);
+}
+
+void FlattenTest::testFlattenWithFailures()
+{
+    TEST_CHUNK("Failure in the inner future")
+    {
+        auto future = AsynQt::Process::exec(
+            "echo", { "Hello KDE!" },
+            [] (QProcess *process) {
+                return fail(QString::fromLatin1(process->readAllStandardOutput()));
+            });
+
+        auto flattenFuture = AsynQt::flatten(future);
+
+        CANCELED_AFTER(flattenFuture, 1 _seconds);
+
+        VERIFY_TYPE(future, QFuture<QFuture<QString>>);
+        VERIFY_TYPE(flattenFuture, QFuture<QString>);
+    }
+
+    TEST_CHUNK("Failure in the outer future")
+    {
+        auto future = AsynQt::makeCanceledFuture<QFuture<QString>>();
+
+        auto flattenFuture = AsynQt::flatten(future);
+
+        CANCELED_AFTER(flattenFuture, 1 _seconds);
+
+        VERIFY_TYPE(future, QFuture<QFuture<QString>>);
+        VERIFY_TYPE(flattenFuture, QFuture<QString>);
+    }
 }
 
 void FlattenTest::initTestCase()

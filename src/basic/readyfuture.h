@@ -36,12 +36,11 @@ namespace AsynQt {
  * and that contains the specified value
  */
 template <typename _Result>
-QFuture<_Result> makeReadyFuture(_Result &&value)
+QFuture<typename std::decay<_Result>::type> makeReadyFuture(_Result &&value)
 {
     using namespace detail;
 
-    return (new ReadyFutureInterface<_Result>(std::forward<_Result>(value)))
-        ->start();
+    return newReadyFutureInterface(std::forward<_Result>(value))->start();
 }
 
 /**
