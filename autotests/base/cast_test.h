@@ -17,34 +17,33 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <QtTest/QtTest>
-#include <QCoreApplication>
-#include <QList>
+#ifndef TEST_CAST_H
+#define TEST_CAST_H
 
-#include "common.h"
+#include <QObject>
 
-#include "wrappers/qprocess_test.h"
-#include "wrappers/qdbus_test.h"
-#include "wrappers/basic_test.h"
+class QProcess;
 
-#include "base/transform_test.h"
-#include "base/cast_test.h"
-#include "base/flatten_test.h"
-#include "base/continuewith_test.h"
+namespace base {
 
-int main(int argc, char *argv[])
-{
-    QCoreApplication app(argc, argv);
+class CastTest : public QObject {
+    Q_OBJECT
 
-    RUN_TEST(wrappers::ProcessExecutionTest);
-    RUN_TEST(wrappers::DBusExecutionTest);
-    RUN_TEST(wrappers::BasicFuturesTest);
+public:
+    CastTest();
 
-    RUN_TEST(base::CastTest);
-    RUN_TEST(base::TransformTest);
-    RUN_TEST(base::FlattenTest);
-    RUN_TEST(base::ContinueWithTest);
+private Q_SLOTS:
+    void initTestCase();
+    void testCast();
+    void cleanupTestCase();
 
-    return 1;
-}
+private:
+    QProcess *m_process1;
+    QProcess *m_process2;
+
+};
+
+} // namespace base
+
+#endif // TEST_CAST_H
 

@@ -18,6 +18,7 @@ set (
    wrappers/qdbus_test.cpp
    wrappers/basic_test.cpp
 
+   base/cast_test.cpp
    base/transform_test.cpp
    base/flatten_test.cpp
    base/continuewith_test.cpp

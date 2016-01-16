@@ -17,34 +17,43 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <QtTest/QtTest>
+#include "cast_test.h"
+
+#include <wrappers/process.h>
+#include <operations/cast.h>
+
+#include <QFuture>
 #include <QCoreApplication>
-#include <QList>
+#include <QtTest>
 
 #include "common.h"
 
-#include "wrappers/qprocess_test.h"
-#include "wrappers/qdbus_test.h"
-#include "wrappers/basic_test.h"
+namespace base {
 
-#include "base/transform_test.h"
-#include "base/cast_test.h"
-#include "base/flatten_test.h"
-#include "base/continuewith_test.h"
-
-int main(int argc, char *argv[])
+CastTest::CastTest()
 {
-    QCoreApplication app(argc, argv);
-
-    RUN_TEST(wrappers::ProcessExecutionTest);
-    RUN_TEST(wrappers::DBusExecutionTest);
-    RUN_TEST(wrappers::BasicFuturesTest);
-
-    RUN_TEST(base::CastTest);
-    RUN_TEST(base::TransformTest);
-    RUN_TEST(base::FlattenTest);
-    RUN_TEST(base::ContinueWithTest);
-
-    return 1;
 }
+
+void CastTest::testCast()
+{
+    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
+
+    auto castFuture = AsynQt::qfuture_cast<QString>(future);
+
+    COMPARE_AFTER(castFuture, QString("Hello KDE\n"), 1 _seconds);
+    VERIFY_TYPE(future, QFuture<QByteArray>);
+    VERIFY_TYPE(castFuture, QFuture<QString>);
+}
+
+
+
+void CastTest::initTestCase()
+{
+}
+
+void CastTest::cleanupTestCase()
+{
+}
+
+} // namespace base
 
