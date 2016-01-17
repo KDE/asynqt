@@ -82,19 +82,18 @@ void BasicFuturesTest::testCanceledFutures()
 void BasicFuturesTest::testDelayedFutures()
 {
     auto delay = 1 _seconds;
-    auto error = 100 _milliseconds;
 
     {
         auto future = AsynQt::makeDelayedFuture(42, delay);
 
-        COMPARE_BETWEEN(future, 42, delay - error, delay + error);
+        COMPARE_FINISHED_AROUND(future, 42, delay);
         VERIFY_TYPE(future, QFuture<int>);
     }
 
     {
         auto future = AsynQt::makeDelayedFuture(delay);
 
-        QVERIFY(waitForFuture(future, delay - error, delay + error));
+        VERIFY_FINISHED_AROUND(future, delay);
         VERIFY_TYPE(future, QFuture<void>);
     }
 }
@@ -103,19 +102,18 @@ void BasicFuturesTest::testDelayedFuturesStdChrono()
 {
     using namespace std::chrono;
     auto delay = 1 _seconds;
-    auto error = 100 _milliseconds;
 
     {
         auto future = AsynQt::makeDelayedFuture(42, seconds(1));
 
-        COMPARE_BETWEEN(future, 42, delay - error, delay + error);
+        COMPARE_FINISHED_AROUND(future, 42, delay);
         VERIFY_TYPE(future, QFuture<int>);
     }
 
     {
         auto future = AsynQt::makeDelayedFuture(milliseconds(1000));
 
-        QVERIFY(waitForFuture(future, delay - error, delay + error));
+        VERIFY_FINISHED_AROUND(future, delay);
         VERIFY_TYPE(future, QFuture<void>);
     }
 }

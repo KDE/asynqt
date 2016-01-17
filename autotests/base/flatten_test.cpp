@@ -44,7 +44,7 @@ void FlattenTest::testFlatten()
 
     auto flattenFuture = AsynQt::flatten(future);
 
-    COMPARE_AFTER(flattenFuture, QByteArray("Hello KDE!\n"), 1 _seconds);
+    COMPARE_FINISHED_BEFORE(flattenFuture, QByteArray("Hello KDE!\n"), 1 _seconds);
 
     VERIFY_TYPE(future, QFuture<QFuture<QByteArray>>);
     VERIFY_TYPE(flattenFuture, QFuture<QByteArray>);
@@ -62,7 +62,7 @@ void FlattenTest::testFlattenWithFailures()
 
         auto flattenFuture = AsynQt::flatten(future);
 
-        VERIFY_CANCELED_AFTER(flattenFuture, 1 _seconds);
+        VERIFY_CANCELED_AROUND(flattenFuture, 1 _seconds);
 
         VERIFY_TYPE(future, QFuture<QFuture<QString>>);
         VERIFY_TYPE(flattenFuture, QFuture<QString>);
@@ -74,7 +74,7 @@ void FlattenTest::testFlattenWithFailures()
 
         auto flattenFuture = AsynQt::flatten(future);
 
-        VERIFY_CANCELED_AFTER(flattenFuture, 1 _seconds);
+        VERIFY_CANCELED_AROUND(flattenFuture, 1 _seconds);
 
         VERIFY_TYPE(future, QFuture<QFuture<QString>>);
         VERIFY_TYPE(flattenFuture, QFuture<QString>);
@@ -84,7 +84,6 @@ void FlattenTest::testFlattenWithFailures()
 void FlattenTest::testFlattenVoid()
 {
     const auto delay = 1 _seconds;
-    const auto error = 100 _milliseconds;
 
     auto future = AsynQt::makeDelayedFuture(
                     AsynQt::makeDelayedFuture(1 _seconds),
@@ -94,7 +93,7 @@ void FlattenTest::testFlattenVoid()
 
     // These futures are running in-parallel, they will both
     // finish in 1 second
-    VERIFY_FINISHED_BETWEEN(flattenFuture, delay - error, delay + error);
+    VERIFY_FINISHED_AROUND(flattenFuture, delay);
 
     VERIFY_TYPE(future, QFuture<QFuture<void>>);
     VERIFY_TYPE(flattenFuture, QFuture<void>);
@@ -114,7 +113,7 @@ void FlattenTest::testFlattenVoidWithFailures()
 
         // These futures are running in-parallel, they will both
         // finish in 1 second
-        VERIFY_CANCELED_AFTER(flattenFuture, delay);
+        VERIFY_CANCELED_AROUND(flattenFuture, delay);
 
         VERIFY_TYPE(future, QFuture<QFuture<void>>);
         VERIFY_TYPE(flattenFuture, QFuture<void>);

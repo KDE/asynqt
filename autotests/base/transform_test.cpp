@@ -62,7 +62,7 @@ void TransformTest::testTransformWithFunctions()
 
     auto transformedFuture = AsynQt::transform(future, stringSize);
 
-    COMPARE_AFTER(transformedFuture, 11, 1 _seconds);
+    COMPARE_FINISHED_BEFORE(transformedFuture, 11, 1 _seconds);
     VERIFY_TYPE(future, QFuture<QByteArray>);
     VERIFY_TYPE(transformedFuture, QFuture<int>);
 }
@@ -73,7 +73,7 @@ void TransformTest::testTransformWithFunctionObjects()
 
     auto transformedFuture = AsynQt::transform(future, SizeMultiplier(2));
 
-    COMPARE_AFTER(transformedFuture, 22, 1 _seconds);
+    COMPARE_FINISHED_BEFORE(transformedFuture, 22, 1 _seconds);
     VERIFY_TYPE(future, QFuture<QByteArray>);
     VERIFY_TYPE(transformedFuture, QFuture<int>);
 }
@@ -88,7 +88,7 @@ void TransformTest::testTransformWithLambdas()
             return input.size();
         });
 
-    COMPARE_AFTER(transformedFuture, 11, 1 _seconds);
+    COMPARE_FINISHED_BEFORE(transformedFuture, 11, 1 _seconds);
     VERIFY_TYPE(future, QFuture<QByteArray>);
     VERIFY_TYPE(transformedFuture, QFuture<int>);
 }
@@ -103,7 +103,7 @@ void TransformTest::testTransformWithCanceledFutures()
             return input.size();
         });
 
-    VERIFY_CANCELED_AFTER(transformedFuture, 100 _milliseconds);
+    VERIFY_CANCELED_AROUND(transformedFuture, 100 _milliseconds);
     VERIFY_TYPE(future, QFuture<QString>);
     VERIFY_TYPE(transformedFuture, QFuture<int>);
 }
@@ -118,19 +118,24 @@ void TransformTest::testTransformWithReadyFutures()
             return input.size();
         });
 
-    COMPARE_AFTER(transformedFuture, 11, 100 _milliseconds);
+    COMPARE_FINISHED_AROUND(transformedFuture, 11, 100 _milliseconds);
     VERIFY_TYPE(future, QFuture<QByteArray>);
     VERIFY_TYPE(transformedFuture, QFuture<int>);
 }
 
 void TransformTest::testTransformVoidFuture()
 {
-    QFuture<void> future = makeCanceledFuture();
+    const auto delay = 1 _seconds;
+    auto future = makeDelayedFuture(delay);
 
-    // This should report a compilation error
-    // auto transformedFuture = AsynQt::transform(future,
-    //     [] () {
-    //     });
+    auto transformedFuture = AsynQt::transform(future,
+        [] () {
+            return 42;
+        });
+
+    COMPARE_FINISHED_AROUND(transformedFuture, 42, delay);
+    VERIFY_TYPE(future, QFuture<void>);
+    VERIFY_TYPE(transformedFuture, QFuture<int>);
 }
 
 void TransformTest::initTestCase()

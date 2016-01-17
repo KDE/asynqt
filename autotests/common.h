@@ -49,6 +49,8 @@ inline bool waitForFuture(Future f, int milliseconds)
     QElapsedTimer timer;
     timer.start();
 
+    milliseconds += 100 _milliseconds;
+
     while (timer.elapsed() < milliseconds && !f.isFinished()) {
         QCoreApplication::processEvents();
     }
@@ -74,26 +76,31 @@ inline bool waitForFuture(Future f, int minMilliseconds, int maxMilliseconds)
     return f.isFinished();
 }
 
-#define VERIFY_FINISHED_AFTER(Future, Time)                                    \
-    QVERIFY(waitForFuture(Future, Time));                                      \
+#define VERIFY_FINISHED_AROUND(Future, Time)                                   \
+    QVERIFY(waitForFuture(Future, Time - 200, Time + 200));                    \
     QVERIFY(!Future.isCanceled())
 
-#define VERIFY_FINISHED_BETWEEN(Future, TimeMin, TimeMax)                      \
-    QVERIFY(waitForFuture(Future, TimeMin, TimeMax));                          \
-    QVERIFY(!Future.isCanceled())
-
-#define COMPARE_AFTER(Future, Value, Time)                                     \
-    QVERIFY(waitForFuture(Future, Time));                                      \
+#define COMPARE_FINISHED_AROUND(Future, Value, Time)                           \
+    QVERIFY(waitForFuture(Future, Time - 200, Time + 200));                    \
     QVERIFY(!Future.isCanceled());                                             \
     QCOMPARE(Future.result(), Value)
 
-#define COMPARE_BETWEEN(Future, Value, TimeMin, TimeMax)                       \
-    QVERIFY(waitForFuture(Future, TimeMin, TimeMax));                          \
+#define VERIFY_CANCELED_AROUND(Future, Time)                                   \
+    waitForFuture(Future, Time - 200, Time + 200);                             \
+    QVERIFY(!Future.isFinished());                                             \
+    QVERIFY(Future.isCanceled())
+
+#define VERIFY_FINISHED_BEFORE(Future, Time)                                   \
+    QVERIFY(waitForFuture(Future, Time + 200));                                \
+    QVERIFY(!Future.isCanceled())
+
+#define COMPARE_FINISHED_BEFORE(Future, Value, Time)                           \
+    QVERIFY(waitForFuture(Future, Time + 200));                                \
     QVERIFY(!Future.isCanceled());                                             \
     QCOMPARE(Future.result(), Value)
 
-#define VERIFY_CANCELED_AFTER(Future, Time)                                    \
-    waitForFuture(Future, Time);                                               \
+#define VERIFY_CANCELED_BEFORE(Future, Time)                                   \
+    waitForFuture(Future, Time + 200);                                         \
     QVERIFY(!Future.isFinished());                                             \
     QVERIFY(Future.isCanceled())
 

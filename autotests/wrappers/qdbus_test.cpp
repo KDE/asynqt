@@ -55,7 +55,7 @@ void DBusExecutionTest::testDBusExecutionWithArgument()
     auto future = AsynQt::DBus::asyncCall<QString>(
         m_dbus, "GetNameOwner", "org.freedesktop.DBus");
 
-    COMPARE_AFTER(future, QStringLiteral("org.freedesktop.DBus"), 1 _seconds);
+    COMPARE_FINISHED_BEFORE(future, QStringLiteral("org.freedesktop.DBus"), 1 _seconds);
     VERIFY_TYPE(future, QFuture<QString>);
 }
 
@@ -64,7 +64,7 @@ void DBusExecutionTest::testDBusExecutionError()
     auto future = AsynQt::DBus::asyncCall<QString>(
         m_dbus, "ThisMethodDoesNotExist_Really_Really");
 
-    VERIFY_CANCELED_AFTER(future, 1 _seconds);
+    VERIFY_CANCELED_BEFORE(future, 1 _seconds);
     VERIFY_TYPE(future, QFuture<QString>);
 }
 

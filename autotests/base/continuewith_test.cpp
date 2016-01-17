@@ -44,7 +44,7 @@ void ContinueWithTest::testContinueWith()
         auto future = common::execHelloKde();
         auto connectedFuture = continueWith(future, common::execEcho);
 
-        COMPARE_AFTER(connectedFuture, common::helloKdeMessage(), 1 _seconds);
+        COMPARE_FINISHED_BEFORE(connectedFuture, common::helloKdeMessage(), 1 _seconds);
         VERIFY_TYPE(future, QFuture<QByteArray>);
         VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
@@ -54,7 +54,7 @@ void ContinueWithTest::testContinueWith()
         auto connectedFuture =
             continueWith(common::execHelloKde(), common::execEcho);
 
-        COMPARE_AFTER(connectedFuture, common::helloKdeMessage(), 1 _seconds);
+        COMPARE_FINISHED_BEFORE(connectedFuture, common::helloKdeMessage(), 1 _seconds);
         VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 }
@@ -68,7 +68,7 @@ void ContinueWithTest::testContinueWithOperator()
         auto future = common::execHelloKde();
         auto connectedFuture = future | common::execEcho;
 
-        COMPARE_AFTER(connectedFuture, common::helloKdeMessage(), 1 _seconds);
+        COMPARE_FINISHED_BEFORE(connectedFuture, common::helloKdeMessage(), 1 _seconds);
         VERIFY_TYPE(future, QFuture<QByteArray>);
         VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
@@ -77,7 +77,7 @@ void ContinueWithTest::testContinueWithOperator()
     {
         auto connectedFuture = common::execHelloKde() | common::execEcho;
 
-        COMPARE_AFTER(connectedFuture, common::helloKdeMessage(), 1 _seconds);
+        COMPARE_FINISHED_BEFORE(connectedFuture, common::helloKdeMessage(), 1 _seconds);
         VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 }
@@ -91,7 +91,7 @@ void ContinueWithTest::testContinueWithFailures()
         auto future = common::execHelloKde();
         auto connectedFuture = future | common::fail;
 
-        VERIFY_CANCELED_AFTER(connectedFuture, 1 _seconds);
+        VERIFY_CANCELED_AROUND(connectedFuture, 1 _seconds);
         VERIFY_TYPE(future, QFuture<QByteArray>);
         VERIFY_TYPE(connectedFuture, QFuture<QString>);
     }
@@ -100,7 +100,7 @@ void ContinueWithTest::testContinueWithFailures()
     {
         auto connectedFuture = common::fail(QString()) | common::execEcho;
 
-        VERIFY_CANCELED_AFTER(connectedFuture, 1 _seconds);
+        VERIFY_CANCELED_AROUND(connectedFuture, 1 _seconds);
         VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 
@@ -108,7 +108,7 @@ void ContinueWithTest::testContinueWithFailures()
     {
         auto connectedFuture = common::fail(QString()) | common::fail;
 
-        VERIFY_CANCELED_AFTER(connectedFuture, 1 _seconds);
+        VERIFY_CANCELED_AROUND(connectedFuture, 1 _seconds);
         VERIFY_TYPE(connectedFuture, QFuture<QString>);
     }
 
