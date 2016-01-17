@@ -17,45 +17,45 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef ASYNQT_BASE_CAST_H
-#define ASYNQT_BASE_CAST_H
 
-#include <QFuture>
-#include <QFutureWatcher>
-
-#include <type_traits>
-#include <memory>
-
-#include "transform.h"
-#include "../private/operations/cast_p.h"
+//
+// W A R N I N G
+// -------------
+//
+// This file is not part of the AsynQt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 namespace AsynQt {
+namespace detail {
 
-/**
- * Casts the future result into the specified type.
- *
- * <code>
- *     auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
- *     auto castFuture = AsynQt::qfuture_cast<QString>(future);
- * </code>
- */
 template <typename _Out, typename _In>
-QFuture<_Out> qfuture_cast(const QFuture<_In> &future)
+QFuture<_Out> qfuture_cast_impl(const QFuture<_In> &future)
 {
-    return detail::qfuture_cast_impl<_Out>(future);
+    return transform(future, [] (const _In &value) -> _Out {
+            return static_cast<_Out>(value);
+        });
 }
 
 namespace operators {
 
-template <typename _Out>
-detail::operators::CastModifier<_Out> cast()
-{
-    return detail::operators::CastModifier<_Out>();
+    template <typename _Out>
+    struct CastModifier {
+    };
+
+    template <typename _In, typename _Out>
+    auto operator | (const QFuture<_In> &future,
+                     CastModifier<_Out> &&)
+        -> decltype(qfuture_cast_impl<_Out>(future))
+    {
+        return qfuture_cast_impl<_Out>(future);
+    }
+
+} // namespace operators
+
 }
-
-} // namespace operator
-
-} // namespace AsynQt
-
-#endif // ASYNQT_BASE_CAST_H
+}
 

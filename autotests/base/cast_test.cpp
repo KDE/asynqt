@@ -45,6 +45,29 @@ void CastTest::testCastBytesToString()
     VERIFY_TYPE(castFuture, QFuture<QString>);
 }
 
+void CastTest::testCastBytesToStringWithPipeSyntax()
+{
+    using namespace operators;
+
+    TEST_CHUNK("With temporary future") {
+        auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
+
+        auto castFuture = future | cast<QString>();
+
+        COMPARE_FINISHED_BEFORE(castFuture, QString("Hello KDE\n"), 1 _seconds);
+        VERIFY_TYPE(future, QFuture<QByteArray>);
+        VERIFY_TYPE(castFuture, QFuture<QString>);
+    }
+
+    TEST_CHUNK("Without temporary future") {
+        auto castFuture = AsynQt::Process::getOutput("echo", { "Hello KDE" })
+                          | cast<QString>();
+
+        COMPARE_FINISHED_BEFORE(castFuture, QString("Hello KDE\n"), 1 _seconds);
+        VERIFY_TYPE(castFuture, QFuture<QString>);
+    }
+}
+
 
 
 void CastTest::initTestCase()

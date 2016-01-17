@@ -37,6 +37,7 @@ private Q_SLOTS:
     void cleanupTestCase();
 
     void testCastBytesToString();
+    void testCastBytesToStringWithPipeSyntax();
 
 };
 
