@@ -36,6 +36,8 @@ private Q_SLOTS:
     void initTestCase();
     void testFlatten();
     void testFlattenWithFailures();
+    void testFlattenVoid();
+    void testFlattenVoidWithFailures();
     void cleanupTestCase();
 
 private:

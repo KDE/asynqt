@@ -41,10 +41,10 @@ void ContinueWithTest::testContinueWith()
 {
     TEST_CHUNK("Connecting a declared future to a continuation")
     {
-        auto future = execHelloKde();
-        auto connectedFuture = continueWith(future, execEcho);
+        auto future = common::execHelloKde();
+        auto connectedFuture = continueWith(future, common::execEcho);
 
-        COMPARE_AFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        COMPARE_AFTER(connectedFuture, common::helloKdeMessage(), 1 _seconds);
         VERIFY_TYPE(future, QFuture<QByteArray>);
         VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
@@ -52,9 +52,9 @@ void ContinueWithTest::testContinueWith()
     TEST_CHUNK("Connecting a temporary future to a continuation")
     {
         auto connectedFuture =
-            continueWith(execHelloKde(), execEcho);
+            continueWith(common::execHelloKde(), common::execEcho);
 
-        COMPARE_AFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        COMPARE_AFTER(connectedFuture, common::helloKdeMessage(), 1 _seconds);
         VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 }
@@ -65,19 +65,19 @@ void ContinueWithTest::testContinueWithOperator()
 
     TEST_CHUNK("Connecting a declared future to a continuation")
     {
-        auto future = execHelloKde();
-        auto connectedFuture = future | execEcho;
+        auto future = common::execHelloKde();
+        auto connectedFuture = future | common::execEcho;
 
-        COMPARE_AFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        COMPARE_AFTER(connectedFuture, common::helloKdeMessage(), 1 _seconds);
         VERIFY_TYPE(future, QFuture<QByteArray>);
         VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 
     TEST_CHUNK("Connecting a temporary future to a continuation")
     {
-        auto connectedFuture = execHelloKde() | execEcho;
+        auto connectedFuture = common::execHelloKde() | common::execEcho;
 
-        COMPARE_AFTER(connectedFuture, helloKdeMessage, 1 _seconds);
+        COMPARE_AFTER(connectedFuture, common::helloKdeMessage(), 1 _seconds);
         VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 }
@@ -88,27 +88,27 @@ void ContinueWithTest::testContinueWithFailures()
 
     TEST_CHUNK("Success connected to a failure")
     {
-        auto future = execHelloKde();
-        auto connectedFuture = future | fail;
+        auto future = common::execHelloKde();
+        auto connectedFuture = future | common::fail;
 
-        CANCELED_AFTER(connectedFuture, 1 _seconds);
+        VERIFY_CANCELED_AFTER(connectedFuture, 1 _seconds);
         VERIFY_TYPE(future, QFuture<QByteArray>);
         VERIFY_TYPE(connectedFuture, QFuture<QString>);
     }
 
     TEST_CHUNK("Failure connected to a success")
     {
-        auto connectedFuture = fail(QString()) | execEcho;
+        auto connectedFuture = common::fail(QString()) | common::execEcho;
 
-        CANCELED_AFTER(connectedFuture, 1 _seconds);
+        VERIFY_CANCELED_AFTER(connectedFuture, 1 _seconds);
         VERIFY_TYPE(connectedFuture, QFuture<QByteArray>);
     }
 
     TEST_CHUNK("Fail twice just for the good measure")
     {
-        auto connectedFuture = fail(QString()) | fail;
+        auto connectedFuture = common::fail(QString()) | common::fail;
 
-        CANCELED_AFTER(connectedFuture, 1 _seconds);
+        VERIFY_CANCELED_AFTER(connectedFuture, 1 _seconds);
         VERIFY_TYPE(connectedFuture, QFuture<QString>);
     }
 

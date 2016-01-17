@@ -36,7 +36,7 @@ TransformTest::TransformTest()
 
 void TransformTest::testTransform()
 {
-    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
+    auto future = common::execHelloKde();
 
     auto transformedFuture = AsynQt::transform(future,
         [] (const QString &input) {
@@ -44,14 +44,14 @@ void TransformTest::testTransform()
             return input.size();
         });
 
-    COMPARE_AFTER(transformedFuture, 10, 1 _seconds);
+    COMPARE_AFTER(transformedFuture, 11, 1 _seconds);
     VERIFY_TYPE(future, QFuture<QByteArray>);
     VERIFY_TYPE(transformedFuture, QFuture<int>);
 }
 
 void TransformTest::testTransformWithCanceledFutures()
 {
-    auto future = fail(QString());
+    auto future = common::fail(QString());
 
     auto transformedFuture = AsynQt::transform(future,
         [] (const QString &input) {
@@ -59,14 +59,14 @@ void TransformTest::testTransformWithCanceledFutures()
             return input.size();
         });
 
-    CANCELED_AFTER(transformedFuture, 1 _seconds);
+    VERIFY_CANCELED_AFTER(transformedFuture, 1 _seconds);
     VERIFY_TYPE(future, QFuture<QString>);
     VERIFY_TYPE(transformedFuture, QFuture<int>);
 }
 
 void TransformTest::testTransformWithReadyFutures()
 {
-    auto future = makeReadyFuture(helloKdeMessage);
+    auto future = makeReadyFuture(common::helloKdeMessage());
 
     auto transformedFuture = AsynQt::transform(future,
         [] (const QString &input) {

@@ -17,43 +17,32 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "cast_test.h"
-
-#include <wrappers/process.h>
-#include <operations/cast.h>
-
-#include <QFuture>
-#include <QCoreApplication>
-#include <QtTest>
-
 #include "common.h"
 
-namespace base {
+namespace common {
 
-CastTest::CastTest()
+QByteArray _helloKdeMessage = "Hello KDE!\n";
+
+QByteArray helloKdeMessage()
 {
+    return _helloKdeMessage;
 }
 
-void CastTest::testCast()
+QFuture<QByteArray> execHelloKde()
 {
-    // auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
-    //
-    // auto castFuture = AsynQt::qfuture_cast<QString>(future);
-    //
-    // COMPARE_AFTER(castFuture, QString("Hello KDE\n"), 1 _seconds);
-    // VERIFY_TYPE(future, QFuture<QByteArray>);
-    // VERIFY_TYPE(castFuture, QFuture<QString>);
+    return Process::getOutput("echo", { _helloKdeMessage.trimmed() });
 }
 
-
-
-void CastTest::initTestCase()
+QFuture<QByteArray> execEcho(const QString &message)
 {
+    return Process::getOutput("echo", { message.trimmed() });
 }
 
-void CastTest::cleanupTestCase()
+QFuture<QString> fail(const QString &message)
 {
+    Q_UNUSED(message)
+    return makeCanceledFuture<QString>();
 }
 
-} // namespace base
+} // namespace common
 

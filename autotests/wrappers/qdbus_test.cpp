@@ -64,7 +64,7 @@ void DBusExecutionTest::testDBusExecutionError()
     auto future = AsynQt::DBus::asyncCall<QString>(
         m_dbus, "ThisMethodDoesNotExist_Really_Really");
 
-    CANCELED_AFTER(future, 1 _seconds);
+    VERIFY_CANCELED_AFTER(future, 1 _seconds);
     VERIFY_TYPE(future, QFuture<QString>);
 }
 

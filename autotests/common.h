@@ -74,20 +74,31 @@ inline bool waitForFuture(Future f, int minMilliseconds, int maxMilliseconds)
     return f.isFinished();
 }
 
+#define VERIFY_FINISHED_AFTER(Future, Time)                                    \
+    QVERIFY(waitForFuture(Future, Time));                                      \
+    QVERIFY(!Future.isCanceled())
+
+#define VERIFY_FINISHED_BETWEEN(Future, TimeMin, TimeMax)                      \
+    QVERIFY(waitForFuture(Future, TimeMin, TimeMax));                          \
+    QVERIFY(!Future.isCanceled())
+
 #define COMPARE_AFTER(Future, Value, Time)                                     \
-        QVERIFY(waitForFuture(Future, Time));                                  \
-        QCOMPARE(Future.result(), Value)
+    QVERIFY(waitForFuture(Future, Time));                                      \
+    QVERIFY(!Future.isCanceled());                                             \
+    QCOMPARE(Future.result(), Value)
 
 #define COMPARE_BETWEEN(Future, Value, TimeMin, TimeMax)                       \
-        QVERIFY(waitForFuture(Future, TimeMin, TimeMax));                      \
-        QCOMPARE(Future.result(), Value)
+    QVERIFY(waitForFuture(Future, TimeMin, TimeMax));                          \
+    QVERIFY(!Future.isCanceled());                                             \
+    QCOMPARE(Future.result(), Value)
 
-#define CANCELED_AFTER(Future, Time)                                           \
-        waitForFuture(Future, Time);                                           \
-        QVERIFY(Future.isCanceled())
+#define VERIFY_CANCELED_AFTER(Future, Time)                                    \
+    waitForFuture(Future, Time);                                               \
+    QVERIFY(!Future.isFinished());                                             \
+    QVERIFY(Future.isCanceled())
 
 #define VERIFY_TYPE(Variable, Type)                                            \
-        QVERIFY((std::is_same<decltype(Variable), Type>::value))
+    QVERIFY((std::is_same<decltype(Variable), Type>::value))
 
 #define TEST_CHUNK(Name) qDebug() << "Test: " << Name;
 
@@ -98,26 +109,13 @@ namespace {
 
 #define DEBUG_TYPE(Variable) { debug_type<decltype(Variable)> error; }
 
+using namespace AsynQt;
 
-namespace {
-    using namespace AsynQt;
-
-    QByteArray helloKdeMessage = "Hello KDE!\n";
-
-    QFuture<QByteArray> execHelloKde()
-    {
-        return Process::getOutput("echo", { helloKdeMessage.trimmed() });
-    }
-
-    QFuture<QByteArray> execEcho(const QString &message)
-    {
-        return Process::getOutput("echo", { message.trimmed() });
-    }
-
-    QFuture<QString> fail(const QString &message)
-    {
-        return makeCanceledFuture<QString>();
-    }
+namespace common {
+    QByteArray helloKdeMessage();
+    QFuture<QByteArray> execHelloKde();
+    QFuture<QByteArray> execEcho(const QString &message);
+    QFuture<QString> fail(const QString &message);
 }
 
 #endif // TESTS_COMMON_H

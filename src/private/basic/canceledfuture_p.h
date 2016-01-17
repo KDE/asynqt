@@ -46,6 +46,7 @@ public:
     {
         auto future = this->future();
 
+        qDebug() << "Starting and canceling";
         this->reportStarted();
         this->reportCanceled();
 

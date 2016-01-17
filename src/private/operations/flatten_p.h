@@ -28,6 +28,8 @@
 // We mean it.
 //
 
+#include <type_traits>
+
 namespace AsynQt {
 namespace detail {
 
@@ -61,20 +63,35 @@ public:
 
             m_secondFutureWatcher->setFuture(m_secondFuture);
 
-            // if (m_secondFuture.isFinished()) {
-            //     qDebug() << "FlattenFutureInterface::start() -- Second one already finished";
-            //     this->secondCallFinished();
-            // }
+            if (m_secondFuture.isFinished() || m_secondFuture.isCanceled()) {
+                qDebug() << "FlattenFutureInterface::start() -- Second one already finished";
+                this->secondCallFinished();
+            }
 
         } else {
             this->reportCanceled();
         }
     }
 
+    inline
+    void secondCallSetResult(std::true_type /* _Result is void */)
+    {
+        // nothing to do
+    }
+
+    inline
+    void secondCallSetResult(std::false_type /* _Result is not void */)
+    {
+        this->reportResult(m_secondFuture.result());
+    }
+
     void secondCallFinished()
     {
+        qDebug() << "Finished second: " << m_secondFuture.isFinished();
+        qDebug() << "Finished second: " << m_secondFuture.isCanceled();
         if (m_secondFuture.isFinished()) {
-            this->reportResult(m_secondFuture.result());
+            // this->reportResult(m_secondFuture.result());
+            secondCallSetResult(typename std::is_void<_Result>::type());
             this->reportFinished();
 
         } else {

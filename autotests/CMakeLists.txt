@@ -22,6 +22,8 @@ set (
    base/transform_test.cpp
    base/flatten_test.cpp
    base/continuewith_test.cpp
+
+   common.cpp
    # Ready.cpp
    )
 

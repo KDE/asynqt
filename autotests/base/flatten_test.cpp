@@ -39,7 +39,7 @@ void FlattenTest::testFlatten()
     auto future = AsynQt::Process::exec(
         "echo", { "Hello KDE!" },
         [] (QProcess *process) {
-            return execEcho(QString::fromLatin1(process->readAllStandardOutput()));
+            return common::execEcho(QString::fromLatin1(process->readAllStandardOutput()));
         });
 
     auto flattenFuture = AsynQt::flatten(future);
@@ -57,12 +57,12 @@ void FlattenTest::testFlattenWithFailures()
         auto future = AsynQt::Process::exec(
             "echo", { "Hello KDE!" },
             [] (QProcess *process) {
-                return fail(QString::fromLatin1(process->readAllStandardOutput()));
+                return common::fail(QString::fromLatin1(process->readAllStandardOutput()));
             });
 
         auto flattenFuture = AsynQt::flatten(future);
 
-        CANCELED_AFTER(flattenFuture, 1 _seconds);
+        VERIFY_CANCELED_AFTER(flattenFuture, 1 _seconds);
 
         VERIFY_TYPE(future, QFuture<QFuture<QString>>);
         VERIFY_TYPE(flattenFuture, QFuture<QString>);
@@ -74,10 +74,50 @@ void FlattenTest::testFlattenWithFailures()
 
         auto flattenFuture = AsynQt::flatten(future);
 
-        CANCELED_AFTER(flattenFuture, 1 _seconds);
+        VERIFY_CANCELED_AFTER(flattenFuture, 1 _seconds);
 
         VERIFY_TYPE(future, QFuture<QFuture<QString>>);
         VERIFY_TYPE(flattenFuture, QFuture<QString>);
+    }
+}
+
+void FlattenTest::testFlattenVoid()
+{
+    const auto delay = 1 _seconds;
+    const auto error = 100 _milliseconds;
+
+    auto future = AsynQt::makeDelayedFuture(
+                    AsynQt::makeDelayedFuture(1 _seconds),
+                    1 _seconds);
+
+    auto flattenFuture = AsynQt::flatten(future);
+
+    // These futures are running in-parallel, they will both
+    // finish in 1 second
+    VERIFY_FINISHED_BETWEEN(flattenFuture, delay - error, delay + error);
+
+    VERIFY_TYPE(future, QFuture<QFuture<void>>);
+    VERIFY_TYPE(flattenFuture, QFuture<void>);
+}
+
+void FlattenTest::testFlattenVoidWithFailures()
+{
+    TEST_CHUNK("Failure in the inner future")
+    {
+        const auto delay = 1 _seconds;
+
+        auto future = AsynQt::makeDelayedFuture(
+                        AsynQt::makeCanceledFuture(),
+                        delay);
+
+        auto flattenFuture = AsynQt::flatten(future);
+
+        // These futures are running in-parallel, they will both
+        // finish in 1 second
+        VERIFY_CANCELED_AFTER(flattenFuture, delay);
+
+        VERIFY_TYPE(future, QFuture<QFuture<void>>);
+        VERIFY_TYPE(flattenFuture, QFuture<void>);
     }
 }
 
