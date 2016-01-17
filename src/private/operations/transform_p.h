@@ -149,6 +149,43 @@ private:
     std::unique_ptr<QFutureWatcher<_In>> m_futureWatcher;
 };
 
+template <typename _In, typename _Transformation>
+QFuture<
+    typename detail::TransformFutureInterface<_In, _Transformation>::result_type
+    >
+transform_impl(const QFuture<_In> &future, _Transformation &&transormation)
+{
+    using namespace detail;
+
+    return (new TransformFutureInterface<_In, _Transformation>(
+                future, std::forward<_Transformation>(transormation)))
+        ->start();
+}
+
+
+namespace operators {
+
+    template <typename _Transformation>
+    class TransformationModifier {
+    public:
+        TransformationModifier(_Transformation transormation)
+            : m_transormation(transormation)
+        {
+        }
+
+        _Transformation m_transormation;
+    };
+
+    template <typename _In, typename _Transformation>
+    auto operator | (const QFuture<_In> &future,
+                     TransformationModifier<_Transformation> &&modifier)
+        -> decltype(transform_impl(future, modifier.m_transormation))
+    {
+        return transform_impl(future, modifier.m_transormation);
+    }
+
+} // namespace operators
+
 } // namespace detail
 } // namespace AsynQt
 

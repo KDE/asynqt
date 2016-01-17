@@ -47,6 +47,11 @@ namespace {
             return m_coef * input.size();
         }
 
+        int operator () (const QByteArray &input)
+        {
+            return m_coef * input.size();
+        }
+
     private:
         int m_coef;
     };
@@ -91,6 +96,33 @@ void TransformTest::testTransformWithLambdas()
     COMPARE_FINISHED_BEFORE(transformedFuture, 11, 1 _seconds);
     VERIFY_TYPE(future, QFuture<QByteArray>);
     VERIFY_TYPE(transformedFuture, QFuture<int>);
+}
+
+void TransformTest::testTransformWithPipeSyntax()
+{
+    using namespace AsynQt::operators;
+
+    TEST_CHUNK("Pipe with lambda") {
+        auto future = common::execHelloKde();
+
+        auto transformedFuture = future | transform(
+            [] (const QString &input) {
+                qDebug() << "Result: " << input;
+                return input.size();
+            });
+
+        COMPARE_FINISHED_BEFORE(transformedFuture, 11, 1 _seconds);
+        VERIFY_TYPE(future, QFuture<QByteArray>);
+        VERIFY_TYPE(transformedFuture, QFuture<int>);
+    }
+
+    TEST_CHUNK("Pipe with functional object, no temporary future") {
+        auto transformedFuture =
+            common::execHelloKde() | transform(SizeMultiplier(2));
+
+        COMPARE_FINISHED_BEFORE(transformedFuture, 22, 1 _seconds);
+        VERIFY_TYPE(transformedFuture, QFuture<int>);
+    }
 }
 
 void TransformTest::testTransformWithCanceledFutures()

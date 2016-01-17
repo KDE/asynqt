@@ -60,11 +60,20 @@ QFuture<
 transform(const QFuture<_In> &future, _Transformation &&transormation)
 {
     using namespace detail;
-
-    return (new TransformFutureInterface<_In, _Transformation>(
-                future, std::forward<_Transformation>(transormation)))
-        ->start();
+    return transform_impl(future, std::forward<_Transformation>(transormation));
 }
+
+namespace operators {
+
+template <typename _Transformation>
+detail::operators::TransformationModifier<_Transformation>
+transform(_Transformation &&transormation)
+{
+    return detail::operators::TransformationModifier<_Transformation>(
+        std::forward<_Transformation>(transormation));
+}
+
+} // namespace operators
 
 } // namespace AsynQt
 
