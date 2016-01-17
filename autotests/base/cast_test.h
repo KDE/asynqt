@@ -34,8 +34,9 @@ public:
 
 private Q_SLOTS:
     void initTestCase();
-    void testCast();
     void cleanupTestCase();
+
+    void testCastBytesToString();
 
 private:
     QProcess *m_process1;

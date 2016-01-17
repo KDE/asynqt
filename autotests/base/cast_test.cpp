@@ -34,15 +34,15 @@ CastTest::CastTest()
 {
 }
 
-void CastTest::testCast()
+void CastTest::testCastBytesToString()
 {
-    // auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
-    //
-    // auto castFuture = AsynQt::qfuture_cast<QString>(future);
-    //
-    // COMPARE_AFTER(castFuture, QString("Hello KDE\n"), 1 _seconds);
-    // VERIFY_TYPE(future, QFuture<QByteArray>);
-    // VERIFY_TYPE(castFuture, QFuture<QString>);
+    auto future = AsynQt::Process::getOutput("echo", { "Hello KDE" });
+
+    auto castFuture = AsynQt::qfuture_cast<QString>(future);
+
+    COMPARE_FINISHED_BEFORE(castFuture, QString("Hello KDE\n"), 1 _seconds);
+    VERIFY_TYPE(future, QFuture<QByteArray>);
+    VERIFY_TYPE(castFuture, QFuture<QString>);
 }
 
 
