@@ -32,14 +32,25 @@ namespace AsynQt {
 namespace detail {
 
 template <typename _In, typename _Transformation>
+struct TransformFutureInterfaceHelper {
+    typedef typename std::result_of<_Transformation(_In)>::type result_type;
+};
+
+template <typename _Transformation>
+struct TransformFutureInterfaceHelper<void, _Transformation> {
+    typedef typename std::result_of<_Transformation()>::type result_type;
+};
+
+
+template <typename _In, typename _Transformation>
 class TransformFutureInterface
     : public QObject
     , public QFutureInterface<
-        typename std::result_of<_Transformation(_In)>::type
+        typename TransformFutureInterfaceHelper<_In, _Transformation>::result_type
     > {
 
 public:
-    typedef typename std::result_of<_Transformation(_In)>::type result_type;
+    typedef typename TransformFutureInterfaceHelper<_In, _Transformation>::result_type result_type;
 
     TransformFutureInterface(QFuture<_In> future,
                                 _Transformation transormation)
@@ -52,13 +63,55 @@ public:
     {
     }
 
+    inline
+    void setFutureResult(
+            std::true_type, // _In is void
+            std::true_type  // result_type is void
+        )
+    {
+        // no value, no result to create, but we still
+        // want to call the transformation function
+        m_transormation();
+    }
+
+    inline
+    void setFutureResult(
+            std::false_type, // _In is not void
+            std::true_type   // result_type is void
+        )
+    {
+        // nothing to do with the value, but we still
+        // want to call the transformation function
+        m_transormation(m_future.result());
+    }
+
+    inline
+    void setFutureResult(
+            std::true_type,  // _In is void
+            std::false_type  // result_type is not void
+        )
+    {
+        this->reportResult(m_transormation());
+    }
+
+    inline
+    void setFutureResult(
+            std::false_type, // _In is not void
+            std::false_type  // result_type is not void
+        )
+    {
+        this->reportResult(m_transormation(m_future.result()));
+    }
+
     void callFinished()
     {
         deleteLater();
 
         if (m_future.isFinished()) {
-            const auto result = m_future.result();
-            this->reportResult(m_transormation(result));
+            setFutureResult(
+                    typename std::is_void<_In>::type(),
+                    typename std::is_void<result_type>::type()
+                );
             this->reportFinished();
 
         } else {
@@ -95,7 +148,6 @@ private:
     _Transformation m_transormation;
     std::unique_ptr<QFutureWatcher<_In>> m_futureWatcher;
 };
-
 
 } // namespace detail
 } // namespace AsynQt

@@ -123,7 +123,7 @@ void TransformTest::testTransformWithReadyFutures()
     VERIFY_TYPE(transformedFuture, QFuture<int>);
 }
 
-void TransformTest::testTransformVoidFuture()
+void TransformTest::testTransformVoidToValueFuture()
 {
     const auto delay = 1 _seconds;
     auto future = makeDelayedFuture(delay);
@@ -136,6 +136,37 @@ void TransformTest::testTransformVoidFuture()
     COMPARE_FINISHED_AROUND(transformedFuture, 42, delay);
     VERIFY_TYPE(future, QFuture<void>);
     VERIFY_TYPE(transformedFuture, QFuture<int>);
+}
+
+void TransformTest::testTransformValueToVoidFuture()
+{
+    const auto delay = 1 _seconds;
+    auto future = makeDelayedFuture(42, delay);
+
+    auto transformedFuture = AsynQt::transform(future,
+        [] (int) {
+        });
+
+    VERIFY_FINISHED_AROUND(transformedFuture, delay);
+    VERIFY_TYPE(future, QFuture<int>);
+    VERIFY_TYPE(transformedFuture, QFuture<void>);
+}
+
+void TransformTest::testTransformVoidToVoidFuture()
+{
+    bool done = false;
+    const auto delay = 1 _seconds;
+    auto future = makeDelayedFuture(delay);
+
+    auto transformedFuture = AsynQt::transform(future,
+        [&done] () {
+            done = true;
+        });
+
+    VERIFY_FINISHED_AROUND(transformedFuture, delay);
+    VERIFY_TYPE(future, QFuture<void>);
+    VERIFY_TYPE(transformedFuture, QFuture<void>);
+    QVERIFY(done);
 }
 
 void TransformTest::initTestCase()

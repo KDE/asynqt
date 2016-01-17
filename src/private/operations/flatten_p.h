@@ -74,13 +74,13 @@ public:
     }
 
     inline
-    void secondCallSetResult(std::true_type /* _Result is void */)
+    void setFutureResult(std::true_type /* _Result is void */)
     {
         // nothing to do
     }
 
     inline
-    void secondCallSetResult(std::false_type /* _Result is not void */)
+    void setFutureResult(std::false_type /* _Result is not void */)
     {
         this->reportResult(m_secondFuture.result());
     }
@@ -91,7 +91,7 @@ public:
         qDebug() << "Finished second: " << m_secondFuture.isCanceled();
         if (m_secondFuture.isFinished()) {
             // this->reportResult(m_secondFuture.result());
-            secondCallSetResult(typename std::is_void<_Result>::type());
+            setFutureResult(typename std::is_void<_Result>::type());
             this->reportFinished();
 
         } else {

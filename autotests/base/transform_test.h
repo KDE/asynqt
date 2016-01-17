@@ -40,7 +40,9 @@ private Q_SLOTS:
     void testTransformWithFunctionObjects();
     void testTransformWithLambdas();
 
-    void testTransformVoidFuture();
+    void testTransformVoidToValueFuture();
+    void testTransformValueToVoidFuture();
+    void testTransformVoidToVoidFuture();
 
     void testTransformWithCanceledFutures();
     void testTransformWithReadyFutures();

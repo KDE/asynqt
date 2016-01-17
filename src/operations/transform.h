@@ -30,9 +30,6 @@
 
 namespace AsynQt {
 
-template <typename _Transformation>
-void transform(const QFuture<void> &future, _Transformation &&transormation);
-
 /**
  * This method applies the specified transformation function to
  * the value stored in the given future. Since the value might not
