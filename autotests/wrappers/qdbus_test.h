@@ -33,10 +33,11 @@ public:
 
 private Q_SLOTS:
     void initTestCase();
+    void cleanupTestCase();
+
     void testDBusExecution();
     void testDBusExecutionWithArgument();
     void testDBusExecutionError();
-    void cleanupTestCase();
 
 private:
     QDBusInterface *m_dbus;

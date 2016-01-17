@@ -34,10 +34,11 @@ public:
 
 private Q_SLOTS:
     void initTestCase();
+    void cleanupTestCase();
+
     void testProcessExecution();
     void testProcessExecutionWithMap();
     void testProcessOutput();
-    void cleanupTestCase();
 
 private:
     QProcess *m_process;

@@ -38,10 +38,6 @@ private Q_SLOTS:
 
     void testCastBytesToString();
 
-private:
-    QProcess *m_process1;
-    QProcess *m_process2;
-
 };
 
 } // namespace base

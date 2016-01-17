@@ -34,15 +34,12 @@ public:
 
 private Q_SLOTS:
     void initTestCase();
+    void cleanupTestCase();
+
     void testFlatten();
     void testFlattenWithFailures();
     void testFlattenVoid();
     void testFlattenVoidWithFailures();
-    void cleanupTestCase();
-
-private:
-    QProcess *m_process1;
-    QProcess *m_process2;
 
 };
 

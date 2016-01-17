@@ -47,10 +47,6 @@ private Q_SLOTS:
     void testTransformWithCanceledFutures();
     void testTransformWithReadyFutures();
 
-private:
-    QProcess *m_process1;
-    QProcess *m_process2;
-
 };
 
 } // namespace base

@@ -32,12 +32,12 @@ public:
 
 private Q_SLOTS:
     void initTestCase();
+    void cleanupTestCase();
+
     void testReadyFutures();
     void testCanceledFutures();
     void testDelayedFutures();
     void testDelayedFuturesStdChrono();
-    void cleanupTestCase();
-
 
 };
 
