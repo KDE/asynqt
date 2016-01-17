@@ -52,7 +52,20 @@ public:
     {
     }
 
-    void callFinished();
+    void callFinished()
+    {
+        deleteLater();
+
+        if (m_future.isFinished()) {
+            const auto result = m_future.result();
+            this->reportResult(m_transormation(result));
+            this->reportFinished();
+
+        } else {
+            this->reportCanceled();
+
+        }
+    }
 
     QFuture<result_type> start()
     {
@@ -83,22 +96,6 @@ private:
     std::unique_ptr<QFutureWatcher<_In>> m_futureWatcher;
 };
 
-template <typename _In, typename _Transformation>
-void TransformFutureInterface<_In, _Transformation>::callFinished()
-{
-    deleteLater();
-
-    if (m_future.isFinished()) {
-        const auto result = m_future.result();
-        this->reportResult(m_transormation(result));
-        this->reportFinished();
-
-    } else {
-        this->reportCanceled();
-
-    }
-
-}
 
 } // namespace detail
 } // namespace AsynQt

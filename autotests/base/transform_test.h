@@ -34,10 +34,16 @@ public:
 
 private Q_SLOTS:
     void initTestCase();
-    void testTransform();
+    void cleanupTestCase();
+
+    void testTransformWithFunctions();
+    void testTransformWithFunctionObjects();
+    void testTransformWithLambdas();
+
+    void testTransformVoidFuture();
+
     void testTransformWithCanceledFutures();
     void testTransformWithReadyFutures();
-    void cleanupTestCase();
 
 private:
     QProcess *m_process1;
