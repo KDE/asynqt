@@ -42,10 +42,18 @@ namespace AsynQt {
 template <typename _Result>
 QFuture<_Result> flatten(const QFuture<QFuture<_Result>> &future)
 {
-    using namespace detail;
-
-    return (new FlattenFutureInterface<_Result>(future))->start();
+    return detail::flatten_impl(future);
 }
+
+namespace operators {
+
+inline
+detail::operators::FlattenModifier flatten()
+{
+    return detail::operators::FlattenModifier();
+}
+
+} // namespace operators
 
 } // namespace AsynQt
 

@@ -134,6 +134,25 @@ private:
     std::unique_ptr<QFutureWatcher<_Result>> m_secondFutureWatcher;
 };
 
+template <typename _Result>
+QFuture<_Result> flatten_impl(const QFuture<QFuture<_Result>> &future)
+{
+    return (new FlattenFutureInterface<_Result>(future))->start();
+}
+
+namespace operators {
+
+struct FlattenModifier {};
+
+template <typename _Result>
+QFuture<_Result> operator | (const QFuture<QFuture<_Result>> &future,
+                             FlattenModifier)
+{
+    return flatten_impl(future);
+}
+
+} // namespace operators
+
 } // namespace detail
 } // namespace AsynQt
 

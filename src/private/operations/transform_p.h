@@ -155,8 +155,6 @@ QFuture<
     >
 transform_impl(const QFuture<_In> &future, _Transformation &&transormation)
 {
-    using namespace detail;
-
     return (new TransformFutureInterface<_In, _Transformation>(
                 future, std::forward<_Transformation>(transormation)))
         ->start();

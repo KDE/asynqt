@@ -40,6 +40,7 @@ private Q_SLOTS:
     void testFlattenWithFailures();
     void testFlattenVoid();
     void testFlattenVoidWithFailures();
+    void testFlattenWithPipeSyntax();
 
 };
 

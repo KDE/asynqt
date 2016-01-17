@@ -30,6 +30,21 @@
 
 namespace base {
 
+namespace {
+    QFuture<QByteArray> passOutputToEcho(QProcess *process)
+    {
+        return common::execEcho(QString::fromLatin1(process->readAllStandardOutput()));
+    };
+
+    class PassOutputToEcho {
+    public:
+        QFuture<QByteArray> operator () (QProcess *process)
+        {
+            return passOutputToEcho(process);
+        }
+    };
+}
+
 FlattenTest::FlattenTest()
 {
 }
@@ -48,6 +63,46 @@ void FlattenTest::testFlatten()
 
     VERIFY_TYPE(future, QFuture<QFuture<QByteArray>>);
     VERIFY_TYPE(flattenFuture, QFuture<QByteArray>);
+}
+
+void FlattenTest::testFlattenWithPipeSyntax()
+{
+    using namespace AsynQt::operators;
+
+    TEST_CHUNK("Pipe with lambda") {
+        auto future = AsynQt::Process::exec(
+            "echo", { "Hello KDE!" },
+            [] (QProcess *process) {
+                return common::execEcho(QString::fromLatin1(process->readAllStandardOutput()));
+            });
+
+        auto flattenFuture = future | flatten();
+
+        COMPARE_FINISHED_BEFORE(flattenFuture, QByteArray("Hello KDE!\n"), 1 _seconds);
+
+        VERIFY_TYPE(future, QFuture<QFuture<QByteArray>>);
+        VERIFY_TYPE(flattenFuture, QFuture<QByteArray>);
+    }
+
+    TEST_CHUNK("Pipe with function, no temporary future") {
+        auto flattenFuture
+            = AsynQt::Process::exec("echo", { "Hello KDE!" }, passOutputToEcho)
+              | flatten();
+
+        COMPARE_FINISHED_BEFORE(flattenFuture, QByteArray("Hello KDE!\n"), 1 _seconds);
+
+        VERIFY_TYPE(flattenFuture, QFuture<QByteArray>);
+    }
+
+    TEST_CHUNK("Pipe with functional object, no temporary future") {
+        auto flattenFuture
+            = AsynQt::Process::exec("echo", { "Hello KDE!" }, PassOutputToEcho())
+              | flatten();
+
+        COMPARE_FINISHED_BEFORE(flattenFuture, QByteArray("Hello KDE!\n"), 1 _seconds);
+
+        VERIFY_TYPE(flattenFuture, QFuture<QByteArray>);
+    }
 }
 
 void FlattenTest::testFlattenWithFailures()
