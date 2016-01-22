@@ -89,7 +89,6 @@ inline bool waitForFuture(Future f, int minMilliseconds, int maxMilliseconds)
 
 #define VERIFY_CANCELED_AROUND(Future, Time)                                   \
     waitForFuture(Future, Time - 200, Time + 200);                             \
-    QVERIFY(!Future.isFinished());                                             \
     QVERIFY(Future.isCanceled())
 
 #define VERIFY_EXCEPTION_AROUND(Future, Exception, Time)                       \
@@ -116,12 +115,10 @@ inline bool waitForFuture(Future f, int minMilliseconds, int maxMilliseconds)
 
 #define VERIFY_CANCELED_BEFORE(Future, Time)                                   \
     waitForFuture(Future, Time + 200);                                         \
-    QVERIFY(!Future.isFinished());                                             \
     QVERIFY(Future.isCanceled())
 
 #define VERIFY_EXCEPTION_BEFORE(Future, Exception, Time)                       \
     waitForFuture(Future, Time + 200);                                         \
-    QVERIFY(!Future.isFinished());                                             \
     QVERIFY(Future.isCanceled());                                              \
     {                                                                          \
         bool exceptionCaught = false;                                          \

@@ -30,6 +30,8 @@
 
 #include <type_traits>
 
+#include "../utils_p.h"
+
 namespace AsynQt {
 namespace detail {
 
@@ -39,99 +41,101 @@ class FlattenFutureInterface : public QObject
 public:
 
     FlattenFutureInterface(QFuture<QFuture<_Result>> future)
-        : m_firstFuture(future)
+        : m_outerFuture(future)
     {
-    }
-
-    ~FlattenFutureInterface()
-    {
-    }
-
-    void firstCallFinished()
-    {
-        if (m_firstFuture.isFinished()) {
-            m_secondFuture = m_firstFuture.result();
-
-            m_secondFutureWatcher.reset(new QFutureWatcher<_Result>());
-
-            QObject::connect(m_secondFutureWatcher.get(),
-                             &QFutureWatcherBase::finished,
-                             [this] () { secondCallFinished(); });
-            QObject::connect(m_secondFutureWatcher.get(),
-                             &QFutureWatcherBase::canceled,
-                             [this] () { secondCallFinished(); });
-
-            m_secondFutureWatcher->setFuture(m_secondFuture);
-
-            if (m_secondFuture.isFinished() || m_secondFuture.isCanceled()) {
-                qDebug() << "FlattenFutureInterface::start() -- Second one already finished";
-                this->secondCallFinished();
-            }
-
-        } else {
-            this->reportCanceled();
-        }
     }
 
     inline
-    void setFutureResult(std::true_type /* _Result is void */)
+    void setFutureResultAt(int, std::true_type /* _Result is void */)
     {
         // nothing to do
     }
 
     inline
-    void setFutureResult(std::false_type /* _Result is not void */)
+    void setFutureResultAt(int index, std::false_type /* _Result is not void */)
     {
-        this->reportResult(m_secondFuture.result());
+        this->reportResult(m_currentInnerFuture.resultAt(index));
     }
 
-    void secondCallFinished()
+    void processNextInnerFuture()
     {
-        qDebug() << "Finished second: " << m_secondFuture.isFinished();
-        qDebug() << "Finished second: " << m_secondFuture.isCanceled();
-        if (m_secondFuture.isFinished()) {
-            // this->reportResult(m_secondFuture.result());
-            setFutureResult(typename std::is_void<_Result>::type());
-            this->reportFinished();
+        // Already processing something
+        if (m_innerFutureWatcher) return;
+
+        m_innerFutureWatcher.reset(new QFutureWatcher<_Result>());
+        m_currentInnerFuture = m_innerFutures.head();
+
+        onFinished(m_innerFutureWatcher, [this]() {
+            dequeueInnerFuture();
+        });
+
+        onCanceled(m_innerFutureWatcher, [this]() {
+            this->reportCanceled();
+        });
+
+        onResultReadyAt(m_innerFutureWatcher, [this](int index) {
+            setFutureResultAt(index, typename std::is_void<_Result>::type());
+        });
+
+        m_innerFutureWatcher->setFuture(m_currentInnerFuture);
+
+        this->reportStarted();
+    }
+
+    void dequeueInnerFuture()
+    {
+        m_innerFutureWatcher.reset();
+        m_innerFutures.dequeue();
+
+        if (m_innerFutures.size() == 0) {
+            if (m_outerFuture.isCanceled()) {
+                this->reportCanceled();
+            }
+
+            if (m_outerFuture.isFinished()) {
+                this->reportFinished();
+            }
 
         } else {
-            this->reportCanceled();
+            processNextInnerFuture();
         }
     }
 
     QFuture<_Result> start()
     {
-        m_firstFutureWatcher.reset(new QFutureWatcher<QFuture<_Result>>());
+        m_outerFutureWatcher.reset(new QFutureWatcher<QFuture<_Result>>());
 
-        QObject::connect(m_firstFutureWatcher.get(),
-                         &QFutureWatcherBase::finished,
-                         [this] () { firstCallFinished(); });
-        QObject::connect(m_firstFutureWatcher.get(),
-                         &QFutureWatcherBase::canceled,
-                         [this] () { firstCallFinished(); });
+        onFinished(m_outerFutureWatcher, [this]() {
+            if (m_innerFutures.isEmpty()) {
+                this->reportFinished();
+            }
+        });
 
-        m_firstFutureWatcher->setFuture(m_firstFuture);
+        onCanceled(m_outerFutureWatcher, [this]() {
+            if (m_innerFutures.isEmpty()) {
+                this->reportCanceled();
+            }
+        });
+
+        onResultReadyAt(m_outerFutureWatcher, [this](int index) {
+            m_innerFutures.enqueue(m_outerFuture.resultAt(index));
+            processNextInnerFuture();
+        });
+
+        m_outerFutureWatcher->setFuture(m_outerFuture);
 
         this->reportStarted();
-
-        // if (m_firstFuture.isFinished()) {
-        //     qDebug() << "FlattenFutureInterface::start() -- Already finished";
-        //     this->firstCallFinished();
-        //
-        // } else if (m_firstFuture.isCanceled()) {
-        //     qDebug() << "FlattenFutureInterface::start() -- Already finished";
-        //     this->firstCallFinished();
-        // }
 
         return this->future();
     }
 
 private:
-    QFuture<QFuture<_Result>> m_firstFuture;
-    std::unique_ptr<QFutureWatcher<QFuture<_Result>>> m_firstFutureWatcher;
+    QFuture<QFuture<_Result>> m_outerFuture;
+    std::unique_ptr<QFutureWatcher<QFuture<_Result>>> m_outerFutureWatcher;
 
-    QFuture<_Result> m_secondFuture;
-    std::unique_ptr<QFutureWatcher<_Result>> m_secondFutureWatcher;
+    QFuture<_Result> m_currentInnerFuture;
+    QQueue<QFuture<_Result>> m_innerFutures;
+    std::unique_ptr<QFutureWatcher<_Result>> m_innerFutureWatcher;
 };
 
 template <typename _Result>

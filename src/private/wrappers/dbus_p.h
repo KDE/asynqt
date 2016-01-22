@@ -71,8 +71,6 @@ private:
 template <typename _Result>
 void DBusCallFutureInterface<_Result>::callFinished()
 {
-    deleteLater();
-
     if (!reply.isError()) {
         this->reportResult(reply.value());
         this->reportFinished();
@@ -81,6 +79,8 @@ void DBusCallFutureInterface<_Result>::callFinished()
         this->reportCanceled();
 
     }
+
+    deleteLater();
 }
 
 template <>

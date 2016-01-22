@@ -28,6 +28,10 @@
 // We mean it.
 //
 
+#include <type_traits>
+
+#include "../utils_p.h"
+
 namespace AsynQt {
 namespace detail {
 
@@ -51,6 +55,8 @@ class TransformFutureInterface
 
 public:
     typedef typename TransformFutureInterfaceHelper<_In, _Transformation>::result_type result_type;
+    typedef typename std::is_void<_In>::type   in_type_is_void;
+    typedef typename std::is_void<result_type> result_type_is_void;
 
     TransformFutureInterface(QFuture<_In> future,
                                 _Transformation transormation)
@@ -63,82 +69,88 @@ public:
     {
     }
 
+    // If _In is void, we are never going to get a result,
+    // so, we need to pretend like we got one when the
+    // future is successfully finished
     inline
-    void setFutureResult(
+    void setFutureResultOnFinished(
             std::true_type, // _In is void
             std::true_type  // result_type is void
         )
     {
+        qDebug() << "value to void";
         // no value, no result to create, but we still
         // want to call the transformation function
-        m_transormation();
+        if (!m_future.isCanceled()) {
+            m_transormation();
+        }
     }
 
     inline
-    void setFutureResult(
-            std::false_type, // _In is not void
-            std::true_type   // result_type is void
-        )
-    {
-        // nothing to do with the value, but we still
-        // want to call the transformation function
-        m_transormation(m_future.result());
-    }
-
-    inline
-    void setFutureResult(
+    void setFutureResultOnFinished(
             std::true_type,  // _In is void
             std::false_type  // result_type is not void
         )
     {
-        this->reportResult(m_transormation());
+        qDebug() << "void to value";
+        if (!m_future.isCanceled()) {
+            this->reportResult(m_transormation());
+        }
+    }
+
+    // Ignore id _In is not void
+    template <typename T>
+    inline
+    void setFutureResultOnFinished(std::false_type, T) {}
+
+    // If _In is not void, then all is as it should be
+    inline
+    void setFutureResultAt(
+            int index,
+            std::false_type, // _In is not void
+            std::true_type   // result_type is void
+        )
+    {
+        qDebug() << "value to void";
+        // nothing to do with the value, but we still
+        // want to call the transformation function
+        m_transormation(m_future.resultAt(index));
     }
 
     inline
-    void setFutureResult(
+    void setFutureResultAt(
+            int index,
             std::false_type, // _In is not void
             std::false_type  // result_type is not void
         )
     {
-        this->reportResult(m_transormation(m_future.result()));
+        qDebug() << "value to value";
+        this->reportResult(m_transormation(m_future.resultAt(index)));
     }
 
-    void callFinished()
-    {
-        deleteLater();
+    template <typename T>
+    inline
+    void setFutureResultAt(int, std::true_type, T) {}
 
-        if (m_future.isFinished()) {
-            setFutureResult(
-                    typename std::is_void<_In>::type(),
-                    typename std::is_void<result_type>::type()
-                );
-            this->reportFinished();
-
-        } else {
-            this->reportCanceled();
-
-        }
-    }
 
     QFuture<result_type> start()
     {
         m_futureWatcher.reset(new QFutureWatcher<_In>());
 
-        QObject::connect(m_futureWatcher.get(),
-                         &QFutureWatcherBase::finished,
-                         [this] () { callFinished(); });
-        QObject::connect(m_futureWatcher.get(),
-                         &QFutureWatcherBase::canceled,
-                         [this] () { callFinished(); });
+        onFinished(m_futureWatcher, [this]() {
+            setFutureResultOnFinished(in_type_is_void(), result_type_is_void());
+            this->reportFinished();
+        });
+
+        onCanceled(m_futureWatcher, [this]() { this->reportCanceled(); });
+
+        onResultReadyAt(m_futureWatcher, [this](int index) {
+            setFutureResultAt(index, in_type_is_void(), result_type_is_void());
+        });
 
         m_futureWatcher->setFuture(m_future);
 
         this->reportStarted();
-
-        // if (m_future.isFinished()) {
-        //     qDebug() << "TransformFutureInterface::start() -- Already finished";
-        //     this->callFinished();
-        // }
 
         return this->future();
     }
