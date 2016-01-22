@@ -18,17 +18,17 @@ set (
 
    main.cpp
 
-   wrappers/qprocess_test.cpp
-   wrappers/qdbus_test.cpp
    wrappers/basic_test.cpp
+   wrappers/qdbus_test.cpp
+   wrappers/qprocess_test.cpp
 
    base/cast_test.cpp
-   base/transform_test.cpp
-   base/flatten_test.cpp
    base/continuewith_test.cpp
+   base/filter_test.cpp
+   base/flatten_test.cpp
+   base/transform_test.cpp
 
    common.cpp
-   # Ready.cpp
    )
 
 if (NOT WIN32)

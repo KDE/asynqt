@@ -17,36 +17,36 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <QtTest/QtTest>
-#include <QCoreApplication>
-#include <QList>
+#ifndef TEST_FILTER_H
+#define TEST_FILTER_H
 
-#include "common.h"
+#include <QObject>
 
-#include "wrappers/basic_test.h"
-#include "wrappers/qdbus_test.h"
-#include "wrappers/qprocess_test.h"
+class QProcess;
 
-#include "base/cast_test.h"
-#include "base/continuewith_test.h"
-#include "base/filter_test.h"
-#include "base/flatten_test.h"
-#include "base/transform_test.h"
+namespace base {
 
-int main(int argc, char *argv[])
-{
-    QCoreApplication app(argc, argv);
+class FilterTest : public QObject {
+    Q_OBJECT
 
-    RUN_TEST(wrappers::ProcessExecutionTest);
-    RUN_TEST(wrappers::DBusExecutionTest);
-    RUN_TEST(wrappers::BasicFuturesTest);
+public:
+    FilterTest();
 
-    RUN_TEST(base::CastTest);
-    RUN_TEST(base::TransformTest);
-    RUN_TEST(base::FlattenTest);
-    RUN_TEST(base::FilterTest);
-    RUN_TEST(base::ContinueWithTest);
+private Q_SLOTS:
+    void initTestCase();
+    void cleanupTestCase();
 
-    return 1;
-}
+    void testFilterWithFunctions();
+    void testFilterWithFunctionObjects();
+    void testFilterWithLambdas();
+    void testFilterWithPipeSyntax();
+
+    void testFilterWithCanceledFutures();
+    void testFilterWithReadyFutures();
+
+};
+
+} // namespace base
+
+#endif // TEST_FILTER_H
 
