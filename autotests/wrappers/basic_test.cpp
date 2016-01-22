@@ -36,6 +36,7 @@ BasicFuturesTest::BasicFuturesTest()
 
 void BasicFuturesTest::testReadyFutures()
 {
+    TEST_CHUNK("Testing a ready int future")
     {
         auto future = AsynQt::makeReadyFuture(42);
 
@@ -47,6 +48,7 @@ void BasicFuturesTest::testReadyFutures()
         VERIFY_TYPE(future, QFuture<int>);
     }
 
+    TEST_CHUNK("Testing a ready void future")
     {
         auto future = AsynQt::makeReadyFuture();
 
@@ -57,23 +59,52 @@ void BasicFuturesTest::testReadyFutures()
     }
 }
 
+class TestException : public QException
+{
+public:
+    void raise() const { throw *this; }
+    TestException *clone() const { return new TestException(*this); }
+};
+
 void BasicFuturesTest::testCanceledFutures()
 {
+    TEST_CHUNK("Testing a canceled QString future")
     {
         auto future = AsynQt::makeCanceledFuture<QString>();
 
         // Without waiting!
-        QVERIFY(!future.isFinished());
         QVERIFY(future.isCanceled());
         QVERIFY(!future.isResultReadyAt(0));
         VERIFY_TYPE(future, QFuture<QString>);
     }
 
+    TEST_CHUNK("Testing a canceled void future")
     {
         auto future = AsynQt::makeCanceledFuture<void>();
 
         // Without waiting!
-        QVERIFY(!future.isFinished());
+        QVERIFY(future.isCanceled());
+        VERIFY_TYPE(future, QFuture<void>);
+    }
+
+    TEST_CHUNK("Testing a QString future with an exception")
+    {
+        auto future = AsynQt::makeCanceledFuture<QString>(TestException());
+
+        // Without waiting!
+        evil::hasException(future);
+        VERIFY_EXCEPTION_AROUND(future, TestException, 0 _seconds);
+        QVERIFY(future.isCanceled());
+        VERIFY_TYPE(future, QFuture<QString>);
+    }
+
+    TEST_CHUNK("Testing a void future with an exception")
+    {
+        auto future = AsynQt::makeCanceledFuture<void>(TestException());
+
+        // Without waiting!
+        evil::hasException(future);
+        VERIFY_EXCEPTION_AROUND(future, TestException, 0 _seconds);
         QVERIFY(future.isCanceled());
         VERIFY_TYPE(future, QFuture<void>);
     }
@@ -83,13 +114,16 @@ void BasicFuturesTest::testDelayedFutures()
 {
     auto delay = 1 _seconds;
 
+    TEST_CHUNK("Testing a delayed int future")
     {
         auto future = AsynQt::makeDelayedFuture(42, delay);
 
+        QVERIFY(!evil::hasException(future));
         COMPARE_FINISHED_AROUND(future, 42, delay);
         VERIFY_TYPE(future, QFuture<int>);
     }
 
+    TEST_CHUNK("Testing a delayed void future")
     {
         auto future = AsynQt::makeDelayedFuture(delay);
 
@@ -103,6 +137,7 @@ void BasicFuturesTest::testDelayedFuturesStdChrono()
     using namespace std::chrono;
     auto delay = 1 _seconds;
 
+    TEST_CHUNK("Testing a delayed int future with std::chrono")
     {
         auto future = AsynQt::makeDelayedFuture(42, seconds(1));
 
@@ -110,6 +145,7 @@ void BasicFuturesTest::testDelayedFuturesStdChrono()
         VERIFY_TYPE(future, QFuture<int>);
     }
 
+    TEST_CHUNK("Testing a delayed void future with std::chrono")
     {
         auto future = AsynQt::makeDelayedFuture(milliseconds(1000));
 

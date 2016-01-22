@@ -9,6 +9,10 @@ include_directories (
    ${CMAKE_BINARY_DIR}/src/
    )
 
+string (REPLACE "-fno-exceptions" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+add_definitions (-fexceptions)
+add_definitions (-DENABLE_EVIL_QFUTURE_HACKS_THAT_SHOULD_BE_IN_QT)
+
 set (
    AsynQtTest_SRCS
 

@@ -21,35 +21,15 @@
 
 namespace AsynQt {
 
-namespace detail {
-    class ReadyVoidFutureInterface
-        : public QObject
-        , QFutureInterface<void> {
-
-    public:
-        ReadyVoidFutureInterface()
-        {
-        }
-
-        QFuture<void> start()
-        {
-            auto future = this->future();
-
-            this->reportStarted();
-            this->reportFinished();
-
-            deleteLater();
-
-            return future;
-        }
-    };
-
-} // namespace detail
-
 QFuture<void> makeReadyFuture()
 {
-    using namespace detail;
-    return (new ReadyVoidFutureInterface())->start();
+    QFutureInterface<void> interface;
+    auto future = interface.future();
+
+    interface.reportStarted();
+    interface.reportFinished();
+
+    return future;
 }
 
 } // namespace AsynQt

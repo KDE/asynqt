@@ -38,9 +38,7 @@ namespace AsynQt {
 template <typename _Result>
 QFuture<typename std::decay<_Result>::type> makeReadyFuture(_Result &&value)
 {
-    using namespace detail;
-
-    return newReadyFutureInterface(std::forward<_Result>(value))->start();
+    return detail::makeReadyFuture(std::forward<_Result>(value));
 }
 
 /**

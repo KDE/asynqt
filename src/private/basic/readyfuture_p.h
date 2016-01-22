@@ -32,40 +32,17 @@ namespace AsynQt {
 namespace detail {
 
 template <typename _Result>
-class ReadyFutureInterface
-    : public QObject
-    , public QFutureInterface<_Result> {
-
-public:
-    ReadyFutureInterface(_Result value)
-        : m_value(value)
-    {
-    }
-
-    QFuture<_Result> start()
-    {
-        auto future = this->future();
-
-        this->reportStarted();
-        this->reportResult(m_value);
-        this->reportFinished();
-
-        deleteLater();
-
-        return future;
-    }
-
-private:
-    _Result m_value;
-
-};
-
-template <typename _Result>
-ReadyFutureInterface<typename std::decay<_Result>::type> *
-newReadyFutureInterface(_Result &&result)
+QFuture<typename std::decay<_Result>::type>
+makeReadyFuture(_Result &&value)
 {
-    return new ReadyFutureInterface<typename std::decay<_Result>::type>(
-        std::forward<_Result>(result));
+    QFutureInterface<_Result> interface;
+    auto future = interface.future();
+
+    interface.reportStarted();
+    interface.reportResult(std::forward<_Result>(value));
+    interface.reportFinished();
+
+    return future;
 }
 
 } // namespace detail

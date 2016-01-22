@@ -27,6 +27,10 @@
 #include <QObject>
 #include <QTimer>
 
+#ifndef QT_NO_EXCEPTIONS
+#include <QException>
+#endif
+
 #include "../private/basic/canceledfuture_p.h"
 
 namespace AsynQt {
@@ -37,12 +41,54 @@ namespace AsynQt {
 template <typename _Result = void>
 QFuture<_Result> makeCanceledFuture()
 {
-    using namespace detail;
-
     // No need to decay the type, expecting the user not to try
     // and make a future of ref-to-type or anything that funny
-    return (new CanceledFutureInterface<_Result>())->start();
+    return detail::makeCanceledFuture<_Result>();
 }
+
+#ifndef QT_NO_EXCEPTIONS
+/**
+ * Creates a canceled future.
+ */
+template <typename _Result = void>
+QFuture<_Result> makeCanceledFuture(const QException &exception)
+{
+    // No need to decay the type, expecting the user not to try
+    // and make a future of ref-to-type or anything that funny
+    return detail::makeCanceledFuture<_Result>(exception);
+}
+
+#ifdef ENABLE_EVIL_QFUTURE_HACKS_THAT_SHOULD_BE_IN_QT
+
+namespace evil {
+
+// TODO: Remove these
+
+template <typename T>
+bool hasException(const QFuture<T> &future)
+{
+    return
+        reinterpret_cast<const QFuture<AsynQt_QFuturePrivacyHack_hasException>*>(
+               &future)
+        ->isCanceled();
+}
+
+template <typename T>
+void throwPossibleException(QFuture<T> &future)
+{
+    reinterpret_cast<QFuture<AsynQt_QFuturePrivacyHack_throwPossibleException>*>(
+            &future)
+        ->cancel();
+}
+
+} // namespace evil
+
+#endif
+
+
+#else
+#warning "Exceptions are disabled. If you enable them, you'll open a whole new world"
+#endif
 
 } // namespace AsynQt
 

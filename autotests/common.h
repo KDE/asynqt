@@ -49,6 +49,8 @@ inline bool waitForFuture(Future f, int milliseconds)
     QElapsedTimer timer;
     timer.start();
 
+    if (milliseconds < 0) milliseconds = 0;
+
     milliseconds += 100 _milliseconds;
 
     while (timer.elapsed() < milliseconds && !f.isFinished()) {
@@ -64,7 +66,7 @@ inline bool waitForFuture(Future f, int minMilliseconds, int maxMilliseconds)
     QElapsedTimer timer;
     timer.start();
 
-    while (timer.elapsed() < maxMilliseconds && !f.isFinished()) {
+    while (timer.elapsed() < maxMilliseconds && !f.isFinished() && !f.isCanceled()) {
         QCoreApplication::processEvents();
     }
 
@@ -90,6 +92,19 @@ inline bool waitForFuture(Future f, int minMilliseconds, int maxMilliseconds)
     QVERIFY(!Future.isFinished());                                             \
     QVERIFY(Future.isCanceled())
 
+#define VERIFY_EXCEPTION_AROUND(Future, Exception, Time)                       \
+    waitForFuture(Future, Time - 200, Time + 200);                             \
+    QVERIFY(Future.isCanceled());                                              \
+    {                                                                          \
+        bool exceptionCaught = false;                                          \
+        try {                                                                  \
+            Future.waitForFinished();                                          \
+        } catch (const Exception &e) {                                         \
+            exceptionCaught = true;                                            \
+        }                                                                      \
+        QVERIFY(exceptionCaught);                                              \
+    }
+
 #define VERIFY_FINISHED_BEFORE(Future, Time)                                   \
     QVERIFY(waitForFuture(Future, Time + 200));                                \
     QVERIFY(!Future.isCanceled())
@@ -103,6 +118,22 @@ inline bool waitForFuture(Future f, int minMilliseconds, int maxMilliseconds)
     waitForFuture(Future, Time + 200);                                         \
     QVERIFY(!Future.isFinished());                                             \
     QVERIFY(Future.isCanceled())
+
+#define VERIFY_EXCEPTION_BEFORE(Future, Exception, Time)                       \
+    waitForFuture(Future, Time + 200);                                         \
+    QVERIFY(!Future.isFinished());                                             \
+    QVERIFY(Future.isCanceled());                                              \
+    {                                                                          \
+        bool exceptionCaught = false;                                          \
+        try {                                                                  \
+            Future.waitForFinished();                                          \
+        } catch (const Exception &e) {                                         \
+            exceptionCaught = true;                                            \
+        }                                                                      \
+        QVERIFY(exceptionCaught);                                              \
+    }
+
+
 
 #define VERIFY_TYPE(Variable, Type)                                            \
     QVERIFY((std::is_same<decltype(Variable), Type>::value))

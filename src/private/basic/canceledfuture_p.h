@@ -33,31 +33,53 @@ namespace AsynQt {
 namespace detail {
 
 template <typename _Result>
-class CanceledFutureInterface
-    : public QObject
-    , public QFutureInterface<_Result> {
+QFuture<_Result> makeCanceledFuture()
+{
+    QFutureInterface<_Result> interface;
+    auto future = interface.future();
 
-public:
-    CanceledFutureInterface()
-    {
-    }
+    interface.reportStarted();
+    interface.reportCanceled();
+    interface.reportFinished();
 
-    QFuture<_Result> start()
-    {
-        auto future = this->future();
+    return future;
+}
 
-        qDebug() << "Starting and canceling";
-        this->reportStarted();
-        this->reportCanceled();
+#ifndef QT_NO_EXCEPTIONS
+template <typename _Result>
+QFuture<_Result> makeCanceledFuture(const QException &exception)
+{
+    QFutureInterface<_Result> interface;
+    auto future = interface.future();
 
-        deleteLater();
+    interface.reportStarted();
+    interface.reportException(exception);
+    interface.reportFinished();
 
-        return future;
-    }
+    return future;
+}
+#endif
 
-};
 
 } // namespace detail
-
 } // namespace AsynQt
+
+#ifdef ENABLE_EVIL_QFUTURE_HACKS_THAT_SHOULD_BE_IN_QT
+
+class AsynQt_QFuturePrivacyHack_hasException;
+template <>
+inline bool QFuture<AsynQt_QFuturePrivacyHack_hasException>::isCanceled() const
+{
+    return d.exceptionStore().hasException();
+}
+
+class AsynQt_QFuturePrivacyHack_throwPossibleException;
+template <>
+inline void QFuture<AsynQt_QFuturePrivacyHack_throwPossibleException>::cancel()
+{
+    return d.exceptionStore().throwPossibleException();
+}
+
+#endif
+
 
