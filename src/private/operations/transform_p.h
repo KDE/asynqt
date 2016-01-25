@@ -37,12 +37,12 @@ namespace detail {
 
 template <typename _In, typename _Transformation>
 struct TransformFutureInterfaceHelper {
-    typedef typename std::result_of<_Transformation(_In)>::type result_type;
+    typedef typename std::result_of<_Transformation&(_In&&)>::type result_type;
 };
 
 template <typename _Transformation>
 struct TransformFutureInterfaceHelper<void, _Transformation> {
-    typedef typename std::result_of<_Transformation()>::type result_type;
+    typedef typename std::result_of<_Transformation&()>::type result_type;
 };
 
 
