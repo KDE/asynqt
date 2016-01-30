@@ -22,10 +22,6 @@ add_library (
    )
 add_library (KF5::AsynQt ALIAS KF5AsynQt)
 
-message(
-   ">>>>>>>>>>> ${CMAKE_CURRENT_BINARY_DIR}/asynqt"
-   )
-
 include_directories (
    ${CMAKE_CURRENT_BINARY_DIR}
    )
