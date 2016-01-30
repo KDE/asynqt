@@ -1,0 +1,14 @@
+
+AsynQt is licensed under LGPL 2 or later.
+
+It is most likely that LGPL 3 is the one that will suit everyone the most,
+except projects that use GPL 2.
+
+Since AsynQt is a header-only library, LGPL 2 might be problematic
+due to its viral effect. This problem is fixed in LGPL 3 which
+allows using LGPL3 header-only libraries in closed-source projects.
+
+
+For more information about LGPL3, check out the great Eigen Licensing FAQ
+http://eigen.tuxfamily.org/index.php?title=Licensing_FAQ&oldid=1116
+
